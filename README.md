@@ -1,4 +1,6 @@
 # Metatrader_utility
+curl http://admin:12345678@192.168.5.39/set.cmd?cmd=setpower+p61=1
+
 {% set poweron_command = 'pduclient --daemon 192.168.5.1 --hostname 127.0.0.1 --
 port 3 --command on' %}
 {% set poweroff_command = 'pduclient --daemon 192.168.5.1 --hostname 127.0.0.1 -
