@@ -1,5 +1,10 @@
 # Metatrader_utility
-
+{% set poweron_command = 'pduclient --daemon 192.168.5.1 --hostname 127.0.0.1 --
+port 3 --command on' %}
+{% set poweroff_command = 'pduclient --daemon 192.168.5.1 --hostname 127.0.0.1 -
+-port 3 --command off' %}
+{% set reboot_command = 'pduclient --daemon 192.168.5.1 --hostname 127.0.0.1 --
+port 3 --command reboot' %}
 
 sudo apt-get update
 sudo apt-get -y install git python3-pip docker.io
