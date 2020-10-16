@@ -1,4 +1,14 @@
 # Metatrader_utility
+
+
+sudo apt-get install isc-dhcp-server
+sudo sed -i 's,INTERFACESv4="",INTE RFA CES v4="enx0",' /etc/default/isc -dhcp-server
+Add the following to /etc/dhcp/dhcpd.conf
+subnet 192.168.66.0 netmask 255.255.255.0 {
+range 192.168.66.11 192.168.66.250;
+option routers 192.168.66.1;
+}
+
 {% set static_ip = '192.168.25.43' %}
 {% set static_gateway = '192.168.25.1' %}
 {% set static_dns = '192.168.25.1' %}
