@@ -1,5 +1,13 @@
 # Metatrader_utility
-
+setenv autoload no
+setenv initrd_high 0xffffffff
+setenv fdt_high 0xffffffff
+dhcp
+setenv serverip 192.168.5.40
+setenv initrd_size ${filesize}
+tftp 0x48000000 3/tftp-deploy-spmkn_6l/dtb/Image-r8a774a1-hihope-rzg2m-ex-idk-1110wr.dtb
+setenv bootargs 'console=ttySC0,115200n8 root=/dev/nfs rw nfsroot=192.168.5.40:/var/lib/lava/dispatcher/tmp/3/extract-nfsrootfs-0tjjo1bs,tcp,hard,intr ip=dhcp'
+booti 0x48080000 - 0x48000000
 
 sudo apt-get install isc-dhcp-server
 sudo sed -i 's,INTERFACESv4="",INTE RFA CES v4="enx0",' /etc/default/isc -dhcp-server
