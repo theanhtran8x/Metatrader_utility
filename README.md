@@ -4,6 +4,7 @@ setenv initrd_high 0xffffffff
 setenv fdt_high 0xffffffff
 dhcp
 setenv serverip 192.168.5.40
+tftp 0x48080000 2/tftp-deploy-37vn4v82/kernel/Image
 setenv initrd_size ${filesize}
 tftp 0x48000000 3/tftp-deploy-spmkn_6l/dtb/Image-r8a774a1-hihope-rzg2m-ex-idk-1110wr.dtb
 setenv bootargs 'console=ttySC0,115200n8 root=/dev/nfs rw nfsroot=192.168.5.40:/var/lib/lava/dispatcher/tmp/3/extract-nfsrootfs-0tjjo1bs,tcp,hard,intr ip=dhcp'
