@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en-us"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LAVA | Scheduler | Jobs | 2</title>
+
+  <link rel="icon" type="image/png" href="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/logo.png">
+  <link rel="stylesheet" type="text/css" href="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/bootstrap-3.css">
+  <link rel="stylesheet" type="text/css" href="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/jquery.css">
+
+  <script>
+    // Hack for fixed navbar anchor problem.
+    // Source: https://github.com/twbs/bootstrap/issues/1786
+    var shiftWindow = function() { scrollBy(0, -50) };
+    window.addEventListener("hashchange", shiftWindow);
+    function fix_anchor_offset() { if (window.location.hash) shiftWindow(); }
+  </script>
+
+  <style>
+    body {
+      padding-top: 60px;
+      margin-bottom: 100px;
+    }
+    html {
+      position: relative;
+      min-height: 100%;
+    }
+    #footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      /* Set the fixed height of the footer here */
+      height: 100px;
+      background-color: #f5f5f5;
+    }
+    #footer > .container {
+      padding-top: 15px;
+      padding-right: 15px;
+      padding-left: 15px;
+    }
+    colgroup col.sorted {
+      background-color: #F8F8F8;
+    }
+
+    table.table thead {
+      background-color: #F0F0F0;
+    }
+    .typeahead__result {
+       display: inline;
+       width: unset;
+    }
+    .typeahead__container {
+      display: inline;
+      font: unset;
+    }
+    .typeahead__field {
+      display: inline;
+    }
+    .typeahead__field > * {
+      vertical-align: unset;
+    }
+  </style>
+  
+  <style>
+    code {
+      margin: 0px;
+      padding-top: 0px;
+      padding-bottom: 0px;
+      border: 0px;
+      color: black;
+      white-space: pre-wrap;
+      display: block;
+    }
+    .results {
+      border: 1px solid black;
+      white-space: normal;
+    }
+    .results_failed {
+      border: 2px solid red;
+    }
+    .exception {
+      border: 1px solid red;
+    }
+
+    .failure_comment {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .feedback {
+      color: #555;
+      background-color: #e7f0e6;
+      border-right: 1px solid grey;
+    }
+
+    .btn-keyboard {
+      color: #fff;
+      background-color: #333;
+      border-color: #333;
+    }
+
+    .btn-keyboard:hover {
+      color: #fff;
+      background-color: #000;
+      border-color: #000;
+    }
+
+    .btn-keyboard.focus {
+      color: #fff;
+    }
+
+    .btn-feedback {
+      color: #555;
+      background-color: #e7f0e6;
+    }
+
+    .btn-feedback:hover {
+      color: #555;
+      background-color: #e0f0d9;
+    }
+
+    .btn-feedback.focus {
+      color: #444;
+      background-color: #e0f0d9;
+    }
+
+    .affix {
+      position: absolute;
+      right: 0px;
+      overflow: auto;
+      background-color: #eee;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 3px;
+      z-index: 1;
+      max-height: 80vh;
+    }
+    .fix-affix {
+      position: fixed;
+      right: 0px;
+      top: 70px;
+    }
+    #affix-full {
+      display: none;
+    }
+
+    .tr-danger {
+      color: #c9302c;
+      font-weight: bold;
+    }
+    .tr-warning {
+      color: #ec971f;
+      font-weight: bold;
+    }
+    .tickLabel {
+      transform: rotate(-30deg);
+    }
+
+    .text-white {
+      color: white;
+    }
+    .text-white:hover {
+      color: white;
+    }
+  </style>
+
+
+  
+
+  
+<style></style></head>
+
+<body onload="fix_anchor_offset()">
+
+  <!-- header -->
+  
+  <!-- menu -->
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="https://lavasoftware.org/"><p><img src="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/logo.png" alt="LAVA Software logo" width="22" height="22"> LAVA</p></a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="http://localhost:10080/"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+          <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-signal"></span> Results <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="http://localhost:10080/results/">Results</a></li>
+              <li><a href="http://localhost:10080/results/query">Queries</a></li>
+              <li><a href="http://localhost:10080/results/chart">Charts</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-calendar"></span> Scheduler <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="http://localhost:10080/scheduler/">Status</a></li>
+              <li><a href="http://localhost:10080/scheduler/reports">Reports</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="http://localhost:10080/scheduler/device_types">Device Types</a></li>
+              <li><a href="http://localhost:10080/scheduler/alldevices">Devices</a></li>
+              <li><a href="http://localhost:10080/scheduler/alljobs">Jobs</a></li>
+              <li><a href="http://localhost:10080/scheduler/allworkers">Workers</a></li>
+              
+              <li role="separator" class="divider"></li>
+              <li><a href="http://localhost:10080/scheduler/jobsubmit">Submit</a></li>
+              
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-flash"></span> API <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="http://localhost:10080/api/help/">Available Methods</a></li>
+              <li><a href="http://localhost:10080/api/tokens/">Authentication Tokens</a></li>
+              <li><a href="http://localhost:10080/api/v0.2/">REST (v0.2)</a></li>
+            </ul>
+          </li>
+          
+              
+                  <li><a href="http://localhost:10080/static/docs/v2/index.html"><span class="glyphicon glyphicon-question-sign"></span> Help</a></li>
+              
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          
+          <li class="visible-lg"><p class="navbar-text">Instance: default</p></li>
+          
+          
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-user"></span> admin <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="http://localhost:10080/me/"><span class="glyphicon glyphicon-cog"></span> Profile</a></li>
+              <li><a href="http://localhost:10080/scheduler/myjobs"><span class="glyphicon glyphicon-tasks"></span> Jobs</a></li>
+              <li><a href="http://localhost:10080/scheduler/favorite-jobs"><span class="glyphicon glyphicon-tasks"></span> Favorite Jobs</a></li>
+              <li><a href="http://localhost:10080/scheduler/mydevices"><span class="glyphicon glyphicon-phone"></span> Devices</a></li>
+              <li><a href="http://localhost:10080/scheduler/mydevicetypehealthhistory"><span class="glyphicon glyphicon-time"></span> Devices Health History</a></li>
+              
+              <li class="divider"></li>
+              <li><a href="http://localhost:10080/admin/"><span class="glyphicon glyphicon-fire"></span> Administration</a></li>
+              
+              <li class="divider"></li>
+              <li><a href="http://localhost:10080/accounts/logout/?next=/"><span class="glyphicon glyphicon-off"></span> Sign out</a></li>
+            </ul>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+<!-- lava-container -->
+<div class="container">
+  
+    
+       <span style="float: right; padding-right: 1em; padding-top: 0.5em"><a target="_blank" href="http://localhost:10080/static/docs/v2/lava-scheduler-jobs-detail.html"><b>Help</b></a></span>
+    
+  <ol class="breadcrumb">
+    
+    
+    <li><a href="http://localhost:10080/">LAVA</a></li>
+    
+    <li><a href="http://localhost:10080/scheduler/">Scheduler</a></li>
+    
+    <li><a href="http://localhost:10080/scheduler/alljobs">Jobs</a></li>
+    
+    <li><a href="http://localhost:10080/scheduler/job/2">2</a></li>
+    
+    
+  </ol>
+  
+
+  
+  
+
+  
+
+
+<div class="row" id="top">
+  <div class="col-md-6">
+    <dl class="dl-horizontal">
+      <dt>Description</dt>
+      <dd>test</dd>
+      <dt>Device-type</dt>
+
+      <dd><a href="http://localhost:10080/scheduler/device_type/r8a774b1-hihope-rzg2n-ex">r8a774b1-hihope-rzg2n-ex</a> <a href="http://localhost:10080/scheduler/reports/device_type/r8a774b1-hihope-rzg2n-ex"><span class="glyphicon glyphicon-stats"></span></a></dd>
+
+      <dt>Submitter</dt>
+      <dd><a href="mailto:">admin</a></dd>
+      <dt>Created</dt>
+      <dd title="Oct. 22, 2020, 10:56 a.m.">now</dd>
+      <dt>Priority</dt>
+      <dd>Low</dd>
+      <dt>Visibility</dt>
+      <dd>Public</dd>
+      
+
+    </dl>
+  </div>
+  <div class="col-md-6">
+    <dl class="dl-horizontal">
+      <dt>#2</dt>
+      
+      <dd><span id="jobstatus"><span class="label label-danger">Incomplete</span></span>
+      
+      
+      </dd>
+      <dt>Device</dt>
+      
+      <dd id="actual_device"><a href="http://localhost:10080/scheduler/device/r8a774b1-hihope-rzg2n-ex-01">r8a774b1-hihope-rzg2n-ex-01</a> <a href="http://localhost:10080/scheduler/reports/device/r8a774b1-hihope-rzg2n-ex-01"><span class="glyphicon glyphicon-stats"></span></a></dd>
+      
+      <dt>Started</dt>
+      <dd id="started" title="None">5&nbsp;minutes ago</dd>
+      <dt>Duration</dt>
+      
+      <dd id="duration">5&nbsp;minutes</dd>
+      
+      
+      <dt>Results</dt>
+      <dd><a href="http://localhost:10080/results/2" class="btn btn-success btn-xs">&nbsp;<span class="glyphicon glyphicon-signal"></span>&nbsp;</a></dd>
+      
+    </dl>
+  </div>
+</div>
+
+
+
+
+<div id="failure_block" style="display: none;">
+  <pre class="alert alert-danger failure_comment">None</pre>
+</div>
+<div class="alert alert-danger" id="size-warning" style="display: none;">
+<p><strong>This log file is too large to view</strong>, (over 5.0&nbsp;MB).
+    It can only be downloaded:
+<a href="http://localhost:10080/scheduler/job/2/log_file/plain"><span class="glyphicon glyphicon-save-file"></span> Plain log</a></p>
+</div>
+<div class="affix hidden-xs hidden-sm fix-affix">
+  <h4>Pipeline <span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span></h4>
+  <div id="affix-full">
+    <ul class="list-unstyled">
+      
+
+
+    </ul>
+  </div>
+</div>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a href="#Log" data-toggle="tab">Summary</a></li>
+  <li><a href="#Details" data-toggle="tab">Details</a></li>
+  <li><a href="#Timing" id="TimingButton" data-toggle="tab">Timing</a></li>
+  <li class="pull-right"><a href="#bottom">End of page <span class="glyphicon glyphicon-chevron-down"></span></a></li>
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="Log">
+
+    <div class="btn-group" data-toggle="buttons" id="logbuttons">
+      <label class="btn btn-default" id="debug_label" for="debug"><input type="checkbox" id="debug" autocomplete="off">debug</label>
+      <label class="btn btn-info" id="info_label" for="info"><input type="checkbox" id="info" autocomplete="off">info</label>
+      <label class="btn btn-warning" id="warning_label" for="warning"><input type="checkbox" id="warning" autocomplete="off">warning</label>
+      <label class="btn btn-danger" id="error_label" for="error"><input type="checkbox" id="error" autocomplete="off">error</label>
+      <label class="btn btn-keyboard" id="keyboard_label" for="keyboard"><input type="checkbox" id="keyboard" autocomplete="off">input</label>
+      <label class="btn btn-success" id="target_label" for="target"><input type="checkbox" id="target" autocomplete="off">output</label>
+      <label class="btn btn-feedback" id="feedback_label" for="feedback"><input type="checkbox" id="feedback" autocomplete="off">feedback</label>
+      <label class="btn btn-primary" id="results_label" for="results"><input type="checkbox" id="results" autocomplete="off">results</label>
+    </div>
+
+
+    <div class="btn-group pull-right">
+      
+      <a class="btn btn-info" href="http://localhost:10080/scheduler/job/2/definition">Definition</a>
+      
+      
+        
+      <a class="btn btn-warning" id="cancel" href="http://localhost:10080/scheduler/job/2/cancel" style="display: none;">Cancel</a>
+        
+      
+      
+      <a class="btn btn-primary" href="http://localhost:10080/scheduler/job/2/resubmit">Resubmit</a>
+      
+      <div class="btn-group">
+        <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          
+          <li><a href="http://localhost:10080/scheduler/job/2/log_file/plain"><span class="glyphicon glyphicon-save-file"></span> Plain log</a></li>
+          <li><a href="http://localhost:10080/scheduler/job/2/configuration"><span class="glyphicon glyphicon-book"></span> Configuration</a></li>
+          <li role="separator" class="divider"></li>
+          <li><a href="http://localhost:10080/scheduler/job/2/toggle_favorite"><span class="glyphicon glyphicon-star-empty"></span> Add to favorites</a></li>
+          <li><a href="#" data-toggle="modal" data-target="#similar_jobs_modal"><span class="glyphicon glyphicon-search"></span> Similar jobs</a></li>
+          
+          <li role="separator" class="divider"></li>
+          
+          
+          <li><a href="http://localhost:10080/admin/lava_scheduler_app/testjob/2/change/">Admin this TestJob</a></li>
+          
+          
+        </ul>
+      </div>
+    </div>
+
+    <div id="sectionlogs">
+      
+      
+      <code class="info bg-info" id="L0">lava-dispatcher, installed at version: 2020.02</code><code class="info bg-info" id="L1">start: 0 validate</code><code class="info bg-info" id="L2">Start time: 2020-10-22 10:56:44.870538+00:00 (UTC)</code><code class="debug" id="L3">Validating that file:///boot/BSP/Image exists</code><code class="debug" id="L4">Validating that file:///boot/BSP/r8a774b1-hihope-rzg2n-ex.dtb exists</code><code class="debug" id="L5">Validating that file:///boot/BSP/core-image-weston-hihope-rzg2n.tar.gz exists</code><code class="info bg-info" id="L6">validate duration: 0.00</code><a href="http://localhost:10080/results/testcase/undefined"><code class="results bg-primary" id="results_lava_validate_F_pass"><span>case: validate</span><br><span>definition: lava</span><br><span>result: pass</span><br></code></a><code class="info bg-info" id="action_1">start: 1 tftp-deploy (timeout 00:10:00) [common]</code><code class="debug" id="action_1-1">start: 1.1 download-retry (timeout 00:10:00) [common]</code><code class="debug" id="action_1-1-1">start: 1.1.1 file-download (timeout 00:10:00) [common]</code><code class="info bg-info" id="L11">downloading file:///boot/BSP/Image</code><code class="debug" id="L12">saving as /var/lib/lava/dispatcher/tmp/2/tftp-deploy-jkpu566_/kernel/Image</code><code class="debug" id="L13">total size: 14584320 (13MB)</code><code class="debug" id="L14">No compression specified</code><code class="debug" id="L15">progress   0% (0MB)</code><code class="debug" id="L16">progress   5% (0MB)</code><code class="debug" id="L17">progress  10% (1MB)</code><code class="debug" id="L18">progress  15% (2MB)</code><code class="debug" id="L19">progress  20% (2MB)</code><code class="debug" id="L20">progress  25% (3MB)</code><code class="debug" id="L21">progress  30% (4MB)</code><code class="debug" id="L22">progress  35% (4MB)</code><code class="debug" id="L23">progress  40% (5MB)</code><code class="debug" id="L24">progress  45% (6MB)</code><code class="debug" id="L25">progress  50% (6MB)</code><code class="debug" id="L26">progress  55% (7MB)</code><code class="debug" id="L27">progress  60% (8MB)</code><code class="debug" id="L28">progress  65% (9MB)</code><code class="debug" id="L29">progress  70% (9MB)</code><code class="debug" id="L30">progress  75% (10MB)</code><code class="debug" id="L31">progress  80% (11MB)</code><code class="debug" id="L32">progress  85% (11MB)</code><code class="debug" id="L33">progress  90% (12MB)</code><code class="debug" id="L34">progress  95% (13MB)</code><code class="debug" id="L35">progress 100% (13MB)</code><code class="info bg-info" id="L36">13MB downloaded in 0.13s (104.06MB/s)</code><code class="debug" id="L37">end: 1.1.1 file-download (duration 00:00:00) [common]</code><a href="http://localhost:10080/results/testcase/undefined"><code class="results bg-primary" id="results_lava_file-download_F_pass"><span>case: file-download</span><br><span>definition: lava</span><br><span>duration: 0.13</span><br><span>extra: ...</span><br><span>level: 1.1.1</span><br><span>namespace: common</span><br><span>result: pass</span><br></code></a><code class="debug" id="L39">end: 1.1 download-retry (duration 00:00:00) [common]</code><code class="debug" id="action_1-2">start: 1.2 download-retry (timeout 00:10:00) [common]</code><code class="debug" id="action_1-2-1">start: 1.2.1 file-download (timeout 00:10:00) [common]</code><code class="info bg-info" id="L42">downloading file:///boot/BSP/r8a774b1-hihope-rzg2n-ex.dtb</code><code class="debug" id="L43">saving as /var/lib/lava/dispatcher/tmp/2/tftp-deploy-jkpu566_/dtb/r8a774b1-hihope-rzg2n-ex.dtb</code><code class="debug" id="L44">total size: 59049 (0MB)</code><code class="debug" id="L45">No compression specified</code><code class="debug" id="L46">progress  55% (0MB)</code><code class="debug" id="L47">progress 100% (0MB)</code><code class="info bg-info" id="L48">0MB downloaded in 0.01s (7.37MB/s)</code><code class="debug" id="L49">end: 1.2.1 file-download (duration 00:00:00) [common]</code><a href="http://localhost:10080/results/testcase/undefined"><code class="results bg-primary" id="results_lava_file-download_F_pass"><span>case: file-download</span><br><span>definition: lava</span><br><span>duration: 0.01</span><br><span>extra: ...</span><br><span>level: 1.2.1</span><br><span>namespace: common</span><br><span>result: pass</span><br></code></a><code class="debug" id="L51">end: 1.2 download-retry (duration 00:00:00) [common]</code><code class="debug" id="action_1-3">start: 1.3 download-retry (timeout 00:10:00) [common]</code><code class="debug" id="action_1-3-1">start: 1.3.1 file-download (timeout 00:10:00) [common]</code><code class="info bg-info" id="L54">downloading file:///boot/BSP/core-image-weston-hihope-rzg2n.tar.gz</code><code class="debug" id="L55">saving as /var/lib/lava/dispatcher/tmp/2/tftp-deploy-jkpu566_/nfsrootfs/core-image-weston-hihope-rzg2n.tar</code><code class="debug" id="L56">total size: 393788518 (375MB)</code><code class="info bg-info" id="L57">Using gunzip to decompress gz</code><code class="debug" id="L58">progress   0% (0MB)</code><code class="debug" id="L59">progress   5% (18MB)</code><code class="debug" id="L60">progress  10% (37MB)</code><code class="debug" id="L61">progress  15% (56MB)</code><code class="debug" id="L62">progress  20% (75MB)</code><code class="debug" id="L63">progress  25% (93MB)</code><code class="debug" id="L64">progress  30% (112MB)</code><code class="debug" id="L65">progress  35% (131MB)</code><code class="debug" id="L66">progress  40% (150MB)</code><code class="debug" id="L67">progress  45% (169MB)</code><code class="debug" id="L68">progress  50% (187MB)</code><code class="debug" id="L69">progress  55% (206MB)</code><code class="debug" id="L70">progress  60% (225MB)</code><code class="debug" id="L71">progress  65% (244MB)</code><code class="debug" id="L72">progress  70% (262MB)</code><code class="debug" id="L73">progress  75% (281MB)</code><code class="debug" id="L74">progress  80% (300MB)</code><code class="debug" id="L75">progress  85% (319MB)</code><code class="debug" id="L76">progress  90% (338MB)</code><code class="debug" id="L77">progress  95% (356MB)</code><code class="debug" id="L78">progress 100% (375MB)</code><code class="info bg-info" id="L79">375MB downloaded in 10.15s (37.00MB/s)</code><code class="debug" id="L80">end: 1.3.1 file-download (duration 00:00:10) [common]</code><a href="http://localhost:10080/results/testcase/18"><code class="results bg-primary" id="results_lava_file-download_F_pass"><span>case: file-download</span><br><span>definition: lava</span><br><span>duration: 10.15</span><br><span>extra: ...</span><br><span>level: 1.3.1</span><br><span>namespace: common</span><br><span>result: pass</span><br></code></a><code class="debug" id="L82">end: 1.3 download-retry (duration 00:00:10) [common]</code><code class="debug" id="action_1-4">start: 1.4 prepare-tftp-overlay (timeout 00:09:50) [common]</code><code class="debug" id="action_1-4-1">start: 1.4.1 extract-nfsrootfs (timeout 00:09:50) [common]</code><code class="debug" id="L85">Extracted nfsroot to /var/lib/lava/dispatcher/tmp/2/extract-nfsrootfs-jd59_lg1</code><code class="debug" id="L86">end: 1.4.1 extract-nfsrootfs (duration 00:00:19) [common]</code><code class="debug" id="action_1-4-2">start: 1.4.2 lava-overlay (timeout 00:09:30) [common]</code><code class="info bg-info" id="L88">[common] skipped lava-overlay - no test action.</code><code class="debug" id="L89">end: 1.4.2 lava-overlay (duration 00:00:00) [common]</code><code class="debug" id="action_1-4-3">start: 1.4.3 extract-overlay-ramdisk (timeout 00:09:30) [common]</code><code class="debug" id="L91">end: 1.4.3 extract-overlay-ramdisk (duration 00:00:00) [common]</code><code class="debug" id="action_1-4-4">start: 1.4.4 extract-modules (timeout 00:09:30) [common]</code><code class="debug" id="L93">end: 1.4.4 extract-modules (duration 00:00:00) [common]</code><code class="debug" id="action_1-4-5">start: 1.4.5 apply-overlay-tftp (timeout 00:09:30) [common]</code><code class="debug" id="L95">end: 1.4.5 apply-overlay-tftp (duration 00:00:00) [common]</code><code class="debug" id="action_1-4-6">start: 1.4.6 prepare-kernel (timeout 00:09:30) [common]</code><code class="debug" id="action_1-4-6-1">start: 1.4.6.1 uboot-prepare-kernel (timeout 00:09:30) [common]</code><code class="debug" id="L98">end: 1.4.6.1 uboot-prepare-kernel (duration 00:00:00) [common]</code><code class="debug" id="L99">end: 1.4.6 prepare-kernel (duration 00:00:00) [common]</code><code class="debug" id="action_1-4-7">start: 1.4.7 configure-preseed-file (timeout 00:09:30) [common]</code><code class="debug" id="L101">end: 1.4.7 configure-preseed-file (duration 00:00:00) [common]</code><code class="debug" id="action_1-4-8">start: 1.4.8 compress-ramdisk (timeout 00:09:30) [common]</code><code class="debug" id="L103">end: 1.4.8 compress-ramdisk (duration 00:00:00) [common]</code><code class="debug" id="L104">end: 1.4 prepare-tftp-overlay (duration 00:00:19) [common]</code><code class="debug" id="action_1-5">start: 1.5 lxc-create-udev-rule-action (timeout 00:09:30) [common]</code><code class="debug" id="L106">No LXC device requested</code><code class="debug" id="L107">end: 1.5 lxc-create-udev-rule-action (duration 00:00:00) [common]</code><code class="debug" id="L108">Checking files for TFTP limit of 4294967296 bytes.</code><code class="info bg-info" id="L109">end: 1 tftp-deploy (duration 00:00:30) [common]</code><code class="info bg-info" id="action_2">start: 2 uboot-action (timeout 00:05:00) [common]</code><code class="debug" id="action_2-1">start: 2.1 uboot-from-media (timeout 00:05:00) [common]</code><code class="debug" id="L112">end: 2.1 uboot-from-media (duration 00:00:00) [common]</code><code class="debug" id="action_2-2">start: 2.2 bootloader-overlay (timeout 00:05:00) [common]</code><code class="debug" id="L114">substitutions:</code><code class="debug" id="L115">- {BOOTX}: booti 0x48080000 - 0x48000000</code><code class="debug" id="L116">- {DTB_ADDR}: 0x48000000</code><code class="debug" id="L117">- {DTB}: 2/tftp-deploy-jkpu566_/dtb/r8a774b1-hihope-rzg2n-ex.dtb</code><code class="debug" id="L118">- {INITRD}: None</code><code class="debug" id="L119">- {KERNEL_ADDR}: 0x48080000</code><code class="debug" id="L120">- {KERNEL}: 2/tftp-deploy-jkpu566_/kernel/Image</code><code class="debug" id="L121">- {LAVA_MAC}: None</code><code class="debug" id="L122">- {NFSROOTFS}: /var/lib/lava/dispatcher/tmp/2/extract-nfsrootfs-jd59_lg1</code><code class="debug" id="L123">- {NFS_SERVER_IP}: 192.168.5.40</code><code class="debug" id="L124">- {PRESEED_CONFIG}: None</code><code class="debug" id="L125">- {PRESEED_LOCAL}: None</code><code class="debug" id="L126">- {RAMDISK_ADDR}: -</code><code class="debug" id="L127">- {RAMDISK}: None</code><code class="debug" id="L128">- {ROOT_PART}: None</code><code class="debug" id="L129">- {ROOT}: None</code><code class="debug" id="L130">- {SERVER_IP}: 192.168.5.40</code><code class="info bg-info" id="L131">Parsed boot commands:</code><code class="info bg-info" id="L132">- setenv autoload no</code><code class="info bg-info" id="L133">- setenv initrd_high 0xffffffff</code><code class="info bg-info" id="L134">- setenv fdt_high 0xffffffff</code><code class="info bg-info" id="L135">- dhcp</code><code class="info bg-info" id="L136">- setenv serverip 192.168.5.40</code><code class="info bg-info" id="L137">- tftp 0x48080000 2/tftp-deploy-jkpu566_/kernel/Image</code><code class="info bg-info" id="L138">- setenv initrd_size ${filesize}</code><code class="info bg-info" id="L139">- tftp 0x48000000 2/tftp-deploy-jkpu566_/dtb/r8a774b1-hihope-rzg2n-ex.dtb</code><code class="info bg-info" id="L140">- setenv bootargs 'console=ttySC0,115200n8 root=/dev/nfs rw nfsroot=192.168.5.40:/var/lib/lava/dispatcher/tmp/2/extract-nfsrootfs-jd59_lg1,tcp,hard,intr  ip=dhcp'</code><code class="info bg-info" id="L141">- booti 0x48080000 - 0x48000000</code><code class="debug" id="L142">end: 2.2 bootloader-overlay (duration 00:00:00) [common]</code><a href="http://localhost:10080/results/testcase/undefined"><code class="results bg-primary" id="results_lava_bootloader-overlay_F_pass"><span>case: bootloader-overlay</span><br><span>definition: lava</span><br><span>duration: 0.01</span><br><span>extra: ...</span><br><span>level: 2.2</span><br><span>namespace: common</span><br><span>result: pass</span><br></code></a><code class="debug" id="action_2-3">start: 2.3 connect-device (timeout 00:05:00) [common]</code><code class="info bg-info" id="L145">[common] connect-device Connecting to device using 'telnet 127.0.0.1 63001'</code><code class="debug" id="L146">Setting prompt string to ['lava-test: # ']</code><code class="debug" id="L147">end: 2.3 connect-device (duration 00:00:01) [common]</code><code class="debug" id="action_2-4">start: 2.4 uboot-retry (timeout 00:04:59) [common]</code><code class="debug" id="action_2-4-1">start: 2.4.1 reset-device (timeout 00:04:59) [common]</code><code class="debug" id="action_2-4-1-1">start: 2.4.1.1 pdu-reboot (timeout 00:04:59) [common]</code><code class="debug" id="L151">Calling: 'nice' 'curl' 'http://admin:12345678@192.168.5.39/set.cmd?cmd=setpower+p61=0' 'curl' 'http://admin:12345678@192.168.5.39/set.cmd?cmd=setpower+p61=1'</code><code class="debug" id="L152">&gt;&gt; &lt;html&gt;p61=0&lt;/html&gt;</code><code class="debug" id="L153">&gt;&gt; curl: (6) Could not resolve host: curl</code><code class="debug" id="L154">&gt;&gt; &lt;html&gt;p61=1&lt;/html&gt;</code><code class="debug" id="L155">Returned 0 in 4 seconds</code><code class="debug" id="L156">end: 2.4.1.1 pdu-reboot (duration 00:00:05) [common]</code><a href="http://localhost:10080/results/testcase/undefined"><code class="results bg-primary" id="results_lava_pdu-reboot_F_pass"><span>case: pdu-reboot</span><br><span>definition: lava</span><br><span>duration: 5.01</span><br><span>extra: ...</span><br><span>level: 2.4.1.1</span><br><span>namespace: common</span><br><span>result: pass</span><br></code></a><code class="debug" id="L158">end: 2.4.1 reset-device (duration 00:00:05) [common]</code><code class="debug" id="action_2-4-2">start: 2.4.2 bootloader-interrupt (timeout 00:04:54) [common]</code><code class="debug" id="L160">Setting prompt string to ['Hit any key to stop autoboot']</code><code class="debug" id="L161">bootloader-interrupt: Wait for prompt ['Hit any key to stop autoboot'] (timeout 00:05:00)</code><code class="target bg-success" id="L162">Trying 127.0.0.1...</code><code class="target bg-success" id="L163">Connected to 127.0.0.1.</code><code class="target bg-success" id="L164">Escape character is '^]'.</code><code class="target bg-success" id="L165">NOTICE:  BL2: RZ/G Initial Program Loader(CA57) Rev.2.0.6</code><code class="target bg-success" id="L166">NOTICE:  BL2: PRR is RZG G2N Ver.1.1</code><code class="target bg-success" id="L167">NOTICE:  BL2: Board is HiHope RZ/G2N Rev.2.0</code><code class="target bg-success" id="L168">NOTICE:  BL2: Boot device is QSPI Flash(40MHz)</code><code class="target bg-success" id="L169">NOTICE:  BL2: LCM state is CM</code><code class="target bg-success" id="L170">NOTICE:  BL2: DDR3200(rev.0.40)</code><code class="target bg-success" id="L171">NOTICE:  BL2: [COLD_BOOT]</code><code class="target bg-success" id="L172">NOTICE:  BL2: DRAM Split is OFF</code><code class="target bg-success" id="L173">NOTICE:  BL2: QoS is default setting(rev.0.09)</code><code class="target bg-success" id="L174">NOTICE:  BL2: DRAM refresh interval 1.95 usec</code><code class="target bg-success" id="L175">NOTICE:  BL2: Periodic Write DQ Training</code><code class="target bg-success" id="L176">NOTICE:  BL2: CH0: 400000000 - 47fffffff, 2 GiB</code><code class="target bg-success" id="L177">NOTICE:  BL2: Lossy Decomp areas</code><code class="target bg-success" id="L178">NOTICE:       Entry 0: DCMPAREACRAx:0x80000540 DCMPAREACRBx:0x570</code><code class="target bg-success" id="L179">NOTICE:       Entry 1: DCMPAREACRAx:0x40000000 DCMPAREACRBx:0x0</code><code class="target bg-success" id="L180">NOTICE:       Entry 2: DCMPAREACRAx:0x20000000 DCMPAREACRBx:0x0</code><code class="target bg-success" id="L181">NOTICE:  BL2: FDT at 0xe6324438</code><code class="target bg-success" id="L182">NOTICE:  BL2: v2.3():v2.3-dirty</code><code class="target bg-success" id="L183">NOTICE:  BL2: Built : 11:39:02, Oct  9 2020</code><code class="target bg-success" id="L184">NOTICE:  BL2: Normal boot</code><code class="target bg-success" id="L185">NOTICE:  BL2: dst=0xe6322000 src=0x8180000 len=512(0x200)</code><code class="target bg-success" id="L186">NOTICE:  BL2: dst=0x43f00000 src=0x8180400 len=6144(0x1800)</code><code class="target bg-success" id="L187">NOTICE:  rcar_file_len: len: 0x0003e000</code><code class="target bg-success" id="L188">NOTICE:  BL2: dst=0x44000000 src=0x81c0000 len=253952(0x3e000)</code><code class="target bg-success" id="L189">NOTICE:  rcar_file_len: len: 0x00100000</code><code class="target bg-success" id="L190">NOTICE:  BL2: dst=0x50000000 src=0x8300000 len=1048576(0x100000)</code><code class="target bg-success" id="L191">NOTICE:  BL2: Booting BL31</code><code class="target bg-success" id="L192"></code><code class="target bg-success" id="L193"></code><code class="target bg-success" id="L194">U-Boot 2018.09 (Oct 09 2020 - 11:17:55 +0000)</code><code class="target bg-success" id="L195"></code><code class="target bg-success" id="L196">CPU: Renesas Electronics R8A774B1 rev 1.1</code><code class="target bg-success" id="L197">Model: Hoperun Technology HiHope RZ/G2N platform (hihope-rzg2n)</code><code class="target bg-success" id="L198">DRAM:  3.9 GiB</code><code class="target bg-success" id="L199">Bank #0: 0x048000000 - 0x0bfffffff, 1.9 GiB</code><code class="target bg-success" id="L200">Bank #1: 0x480000000 - 0x4ffffffff, 2 GiB</code><code class="target bg-success" id="L201"></code><code class="target bg-success" id="L202">Watchdog: Not found by seq!</code><code class="target bg-success" id="L203">WDT:   watchdog@e6020000</code><code class="target bg-success" id="L204">Watchdog: Started!</code><code class="target bg-success" id="L205">MMC:   sd@ee100000: 0, sd@ee160000: 1</code><code class="target bg-success" id="L206">Loading Environment from MMC... OK</code><code class="target bg-success" id="L207">In:    serial@e6e88000</code><code class="target bg-success" id="L208">Out:   serial@e6e88000</code><code class="target bg-success" id="L209">Err:   serial@e6e88000</code><code class="target bg-success" id="L210">Net:   eth0: ethernet@e6800000</code><code class="keyboard" id="L211"><kbd>
+</kbd></code><code class="target bg-success" id="L212">Hit any key to stop autoboot:  5 </code><code class="debug" id="L213">end: 2.4.2 bootloader-interrupt (duration 00:00:01) [common]</code><code class="debug" id="action_2-4-3">start: 2.4.3 bootloader-commands (timeout 00:04:53) [common]</code><code class="debug" id="L215">Setting prompt string to ['=&gt;']</code><code class="debug" id="L216">bootloader-commands: Wait for prompt ['=&gt;'] (timeout 00:04:53)</code><code class="target bg-success" id="L217"> 0 </code><code class="debug" id="L218">Setting prompt string to ['=&gt;', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory']</code><code class="debug" id="L219">Sending with 20 millisecond of delay</code><code class="keyboard" id="L220"><kbd>setenv autoload no
+</kbd></code><code class="target bg-success" id="L221">=&gt; setenv autoload no</code><code class="debug" id="L222">bootloader-commands: Wait for prompt ['=&gt;', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory'] (timeout 00:04:52)</code><code class="target bg-success" id="L223">setenv autoload no</code><code class="debug" id="L224">Sending with 20 millisecond of delay</code><code class="keyboard" id="L225"><kbd>setenv initrd_high 0xffffffff
+</kbd></code><code class="target bg-success" id="L226">=&gt; setenv initrd_high 0xffffffff</code><code class="debug" id="L227">bootloader-commands: Wait for prompt ['=&gt;', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory'] (timeout 00:04:50)</code><code class="target bg-success" id="L228">setenv initrd_high 0xffffffff</code><code class="debug" id="L229">Sending with 20 millisecond of delay</code><code class="keyboard" id="L230"><kbd>setenv fdt_high 0xffffffff
+</kbd></code><code class="target bg-success" id="L231">=&gt; setenv fdt_high 0xffffffff</code><code class="debug" id="L232">bootloader-commands: Wait for prompt ['=&gt;', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory'] (timeout 00:04:48)</code><code class="target bg-success" id="L233">setenv fdt_high 0xffffffff</code><code class="debug" id="L234">Sending with 20 millisecond of delay</code><code class="keyboard" id="L235"><kbd>dhcp
+</kbd></code><code class="target bg-success" id="L236">=&gt; dhcp</code><code class="debug" id="L237">bootloader-commands: Wait for prompt ['=&gt;', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory'] (timeout 00:04:47)</code><code class="target bg-success" id="L238">dhcp</code><code class="target bg-success" id="L239">ethernet@e6800000 Waiting for PHY auto negotiation to complete.. done</code><code class="target bg-success" id="L240">BOOTP broadcast 1</code><code class="target bg-success" id="L241">DHCP client bound to address 192.168.5.118 (4 ms)</code><code class="debug" id="L242">Sending with 20 millisecond of delay</code><code class="keyboard" id="L243"><kbd>setenv serverip 192.168.5.40
+</kbd></code><code class="target bg-success" id="L244">=&gt; setenv serverip 192.168.5.40</code><code class="debug" id="L245">bootloader-commands: Wait for prompt ['=&gt;', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory'] (timeout 00:04:44)</code><code class="target bg-success" id="L246">setenv serverip 192.168.5.40</code><code class="debug" id="L247">Sending with 20 millisecond of delay</code><code class="keyboard" id="L248"><kbd>tftp 0x48080000 2/tftp-deploy-jkpu566_/kernel/Image
+</kbd></code><code class="target bg-success" id="L249">=&gt; tftp 0x48080000 2/tftp-deploy-jkpu566_/kernel/Image</code><code class="debug" id="L250">bootloader-commands: Wait for prompt ['=&gt;', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory'] (timeout 00:04:40)</code><code class="target bg-success" id="L251">tftp 0x48080000 2/tftp-deploy-jkpu566_/kernel/Image</code><code class="target bg-success" id="L252">Using ethernet@e6800000 device</code><code class="target bg-success" id="L253">TFTP from server 192.168.5.40; our IP address is 192.168.5.118</code><code class="target bg-success" id="L254">Filename '2/tftp-deploy-jkpu566_/kernel/Image'.</code><code class="target bg-success" id="L255">Load address: 0x48080000</code><code class="target bg-success" id="L256">Loading: *#################################################################</code><code class="target bg-success" id="L257">	 #################################################################</code><code class="target bg-success" id="L258">	 #################################################################</code><code class="target bg-success" id="L259">	 #################################################################</code><code class="target bg-success" id="L260">	 #################################################################</code><code class="target bg-success" id="L261">	 #################################################################</code><code class="target bg-success" id="L262">	 #################################################################</code><code class="target bg-success" id="L263">	 #################################################################</code><code class="target bg-success" id="L264">	 #################################################################</code><code class="target bg-success" id="L265">	 #################################################################</code><code class="target bg-success" id="L266">	 #################################################################</code><code class="target bg-success" id="L267">	 #################################################################</code><code class="target bg-success" id="L268">	 #################################################################</code><code class="target bg-success" id="L269">	 #################################################################</code><code class="target bg-success" id="L270">	 #################################################################</code><code class="target bg-success" id="L271">	 ###################</code><code class="target bg-success" id="L272">	 3.3 MiB/s</code><code class="target bg-success" id="L273">done</code><code class="target bg-success" id="L274">Bytes transferred = 14584320 (de8a00 hex)</code><code class="debug" id="L275">Sending with 20 millisecond of delay</code><code class="keyboard" id="L276"><kbd>setenv initrd_size ${filesize}
+</kbd></code><code class="target bg-success" id="L277">=&gt; setenv initrd_size ${filesize}</code><code class="debug" id="L278">bootloader-commands: Wait for prompt ['=&gt;', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory'] (timeout 00:04:34)</code><code class="target bg-success" id="L279">setenv initrd_size ${filesize}</code><code class="debug" id="L280">Sending with 20 millisecond of delay</code><code class="keyboard" id="L281"><kbd>tftp 0x48000000 2/tftp-deploy-jkpu566_/dtb/r8a774b1-hihope-rzg2n-ex.dtb
+</kbd></code><code class="target bg-success" id="L282">=&gt; tftp 0x48000000 2/tftp-deploy-jkpu566_/dtb/r8a774b1-hihope-rzg2n-ex.dtb</code><code class="debug" id="L283">bootloader-commands: Wait for prompt ['=&gt;', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory'] (timeout 00:04:29)</code><code class="target bg-success" id="L284">tftp 0x48000000 2/tftp-deploy-jkpu566_/dtb/r8a774b1-hihope-rzg2n-ex.dtb</code><code class="target bg-success" id="L285">Using ethernet@e6800000 device</code><code class="target bg-success" id="L286">TFTP from server 192.168.5.40; our IP address is 192.168.5.118</code><code class="target bg-success" id="L287">Filename '2/tftp-deploy-jkpu566_/dtb/r8a774b1-hihope-rzg2n-ex.dtb'.</code><code class="target bg-success" id="L288">Load address: 0x48000000</code><code class="target bg-success" id="L289">Loading: *#####</code><code class="target bg-success" id="L290">	 1.7 MiB/s</code><code class="target bg-success" id="L291">done</code><code class="target bg-success" id="L292">Bytes transferred = 59049 (e6a9 hex)</code><code class="debug" id="L293">Sending with 20 millisecond of delay</code><code class="keyboard" id="L294"><kbd>setenv bootargs 'console=ttySC0,115200n8 root=/dev/nfs rw nfsroot=192.168.5.40:/var/lib/lava/dispatcher/tmp/2/extract-nfsrootfs-jd59_lg1,tcp,hard,intr  ip=dhcp'
+</kbd></code><code class="target bg-success" id="L295">=&gt; setenv bootargs 'console=ttySC0,115200n8 root=/dev/nfs rw nfsroot=192.168.5.40:/var/lib/lava/dispatcher/tmp/2/extract-nfsrootfs-jd59_lg1,tcp,hard,intr  ip=dhcp'</code><code class="debug" id="L296">bootloader-commands: Wait for prompt ['=&gt;', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory'] (timeout 00:04:17)</code><code class="target bg-success" id="L297">setenv bootargs 'console=ttySC0,115200n8 root=/dev/nfs rw nfsroot=192.168.5.40:/var/lib/lava/dispatcher/tmp/2/extract-nfsrootfs-jd59_lg1,tcp,hard,intr  ip=dhcp'</code><code class="debug" id="L298">Sending with 20 millisecond of delay</code><code class="keyboard" id="L299"><kbd>booti 0x48080000 - 0x48000000
+</kbd></code><code class="target bg-success" id="L300">=&gt; booti 0x48080000 - 0x48000000</code><code class="debug" id="L301">Setting prompt string to ['Starting kernel']</code><code class="debug" id="L302">bootloader-commands: Wait for prompt ['Starting kernel'] (timeout 00:04:15)</code><code class="target bg-success" id="L303">booti 0x48080000 - 0x48000000</code><code class="target bg-success" id="L304">## Flattened Device Tree blob at 48000000</code><code class="target bg-success" id="L305">   Booting using the fdt blob at 0x48000000</code><code class="target bg-success" id="L306">   Loading Device Tree to 00000000bddfa000, end 00000000bde0b6a8 ... OK</code><code class="target bg-success" id="L307"></code><code class="target bg-success" id="L308">Starting kernel ...</code><code class="target bg-success" id="L309"></code><code class="debug" id="L310">end: 2.4.3 bootloader-commands (duration 00:00:38) [common]</code><code class="debug" id="action_2-4-4">start: 2.4.4 auto-login-action (timeout 00:04:15) [common]</code><code class="debug" id="L312">Setting prompt string to ['Linux version [0-9]']</code><code class="debug" id="L313">Setting prompt string to ['Linux version [0-9]', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory']</code><code class="debug" id="L314">auto-login-action: Wait for prompt ['Linux version [0-9]', 'Resetting CPU', 'Must RESET board to recover', 'TIMEOUT', 'Retry count exceeded', 'Retry time exceeded; starting again', 'ERROR: The remote end did not respond in time.', 'File not found', 'Bad Linux ARM64 Image magic!', 'Wrong Ramdisk Image Format', 'Ramdisk image is corrupt or invalid', 'ERROR: Failed to allocate', 'TFTP error: trying to overwrite reserved memory'] (timeout 00:05:00)</code><code class="target bg-success" id="L315">[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd073]</code><code class="warning bg-warning" id="L316">The string 'root@hihope-rzg2n' does not look like a typical prompt and could match status messages instead. Please check the job log files and use a prompt string which matches the actual prompt string more closely.</code><code class="debug" id="L317">Setting prompt string to ['-+\\[ cut here \\]-+\\s+(.*\\s+-+\\[ end trace (\\w*) \\]-+)', '(Unhandled fault.*)\\r\\n', 'Kernel panic - (.*) end Kernel panic', 'Stack:\\s+(.*\\s+-+\\[ end trace (\\w*) \\]-+)']</code><code class="debug" id="L318">Using line separator: #'\n'#</code><code class="info bg-info" id="L319">Waiting for the login prompt</code><code class="info bg-info" id="L320">Parsing kernel messages</code><code class="debug" id="L321">-+\[ cut here \]-+\s+(.*\s+-+\[ end trace (\w*) \]-+),(Unhandled fault.*)\r\n,Kernel panic - (.*) end Kernel panic,Stack:\s+(.*\s+-+\[ end trace (\w*) \]-+),root@hihope-rzg2n,hihope-rzg2n login:,Login incorrect</code><code class="debug" id="L322">[auto-login-action] Waiting for messages, (timeout 00:04:14)</code><code class="target bg-success" id="L323">[    0.000000] Linux version 4.19.132-cip30-rt12-yocto-standard (oe-user@oe-host) (gcc version 7.3.0 (GCC)) #1 SMP PREEMPT RT Fri Oct 9 02:42:57 UTC 2020</code><code class="target bg-success" id="L324">[    0.000000] Machine model: HopeRun HiHope RZ/G2N Rev2 with sub board</code><code class="target bg-success" id="L325">[    0.000000] efi: Getting EFI parameters from FDT:</code><code class="target bg-success" id="L326">[    0.000000] efi: UEFI not found.</code><code class="target bg-success" id="L327">[    0.000000] Reserved memory: created CMA memory pool at 0x0000000058000000, size 512 MiB</code><code class="target bg-success" id="L328">[    0.000000] OF: reserved mem: initialized node linux,cma@58000000, compatible id shared-dma-pool</code><code class="target bg-success" id="L329">[    0.000000] Reserved memory: created CMA memory pool at 0x0000000078000000, size 256 MiB</code><code class="target bg-success" id="L330">[    0.000000] OF: reserved mem: initialized node linux,multimedia@70000000, compatible id shared-dma-pool</code><code class="target bg-success" id="L331">[    0.000000] psci: probing for conduit method from DT.</code><code class="target bg-success" id="L332">[    0.000000] psci: PSCIv1.1 detected in firmware.</code><code class="target bg-success" id="L333">[    0.000000] psci: Using standard PSCI v0.2 function IDs</code><code class="target bg-success" id="L334">[    0.000000] psci: MIGRATE_INFO_TYPE not supported.</code><code class="target bg-success" id="L335">[    0.000000] psci: SMC Calling Convention v1.0</code><code class="target bg-success" id="L336">[    0.000000] random: get_random_bytes called from start_kernel+0xa8/0x418 with crng_init=0</code><code class="target bg-success" id="L337">[    0.000000] percpu: Embedded 23 pages/cpu s55488 r8192 d30528 u94208</code><code class="target bg-success" id="L338">[    0.000000] Detected PIPT I-cache on CPU0</code><code class="target bg-success" id="L339">[    0.000000] ARM_SMCCC_ARCH_WORKAROUND_1 missing from firmware</code><code class="target bg-success" id="L340">[    0.000000] CPU features: enabling workaround for EL2 vector hardening</code><code class="target bg-success" id="L341">[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 987840</code><code class="target bg-success" id="L342">[    0.000000] Kernel command line: console=ttySC0,115200n8 root=/dev/nfs rw nfsroot=192.168.5.40:/var/lib/lava/dispatcher/tmp/2/extract-nfsrootfs-jd59_lg1,tcp,hard,intr  ip=dhcp</code><code class="target bg-success" id="L343">[    0.000000] Dentry cache hash table entries: 524288 (order: 11, 8388608 bytes)</code><code class="target bg-success" id="L344">[    0.000000] Inode-cache hash table entries: 262144 (order: 9, 2097152 bytes)</code><code class="target bg-success" id="L345">[    0.000000] software IO TLB: mapped [mem 0xb9dfa000-0xbddfa000] (64MB)</code><code class="target bg-success" id="L346">[    0.000000] Memory: 3070308K/4014080K available (10044K kernel code, 674K rwdata, 2928K rodata, 576K init, 380K bss, 157340K reserved, 786432K cma-reserved)</code><code class="target bg-success" id="L347">[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1</code><code class="target bg-success" id="L348">[    0.000000] rcu: Preemptible hierarchical RCU implementation.</code><code class="target bg-success" id="L349">[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=8 to nr_cpu_ids=2.</code><code class="target bg-success" id="L350">[    0.000000] rcu: 	RCU priority boosting: priority 1 delay 500 ms.</code><code class="target bg-success" id="L351">[    0.000000] 	No expedited grace period (rcu_normal_after_boot).</code><code class="target bg-success" id="L352">[    0.000000] 	Tasks RCU enabled.</code><code class="target bg-success" id="L353">[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=2</code><code class="target bg-success" id="L354">[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0</code><code class="target bg-success" id="L355">[    0.000000] arch_timer: cp15 timer(s) running at 8.33MHz (virt).</code><code class="target bg-success" id="L356">[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x1ec02923e, max_idle_ns: 440795202125 ns</code><code class="target bg-success" id="L357">[    0.000003] sched_clock: 56 bits at 8MHz, resolution 120ns, wraps every 2199023255496ns</code><code class="target bg-success" id="L358">[    0.000075] Console: colour dummy device 80x25</code><code class="target bg-success" id="L359">[    0.000136] Calibrating delay loop (skipped), value calculated using timer frequency.. 16.66 BogoMIPS (lpj=33333)</code><code class="target bg-success" id="L360">[    0.000141] pid_max: default: 32768 minimum: 301</code><code class="target bg-success" id="L361">[    0.000194] Security Framework initialized</code><code class="target bg-success" id="L362">[    0.000251] Mount-cache hash table entries: 8192 (order: 4, 65536 bytes)</code><code class="target bg-success" id="L363">[    0.000271] Mountpoint-cache hash table entries: 8192 (order: 4, 65536 bytes)</code><code class="target bg-success" id="L364">[    0.023991] ASID allocator initialised with 32768 entries</code><code class="target bg-success" id="L365">[    0.039985] rcu: Hierarchical SRCU implementation.</code><code class="target bg-success" id="L366">[    0.064526] Detected Renesas RZ/G2 r8a774b1 ES1.1</code><code class="target bg-success" id="L367">[    0.064945] EFI services will not be available.</code><code class="target bg-success" id="L368">[    0.072043] smp: Bringing up secondary CPUs ...</code><code class="target bg-success" id="L369">[    0.128249] Detected PIPT I-cache on CPU1</code><code class="target bg-success" id="L370">[    0.128288] CPU1: Booted secondary processor 0x0000000001 [0x411fd073]</code><code class="target bg-success" id="L371">[    0.128358] smp: Brought up 1 node, 2 CPUs</code><code class="target bg-success" id="L372">[    0.128368] SMP: Total of 2 processors activated.</code><code class="target bg-success" id="L373">[    0.128374] CPU features: detected: 32-bit EL0 Support</code><code class="target bg-success" id="L374">[    0.128702] CPU: All CPU(s) started at EL1</code><code class="target bg-success" id="L375">[    0.128714] alternatives: patching kernel code</code><code class="target bg-success" id="L376">[    0.129310] devtmpfs: initialized</code><code class="target bg-success" id="L377">[    0.134585] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns</code><code class="target bg-success" id="L378">[    0.134601] futex hash table entries: 512 (order: 4, 65536 bytes)</code><code class="target bg-success" id="L379">[    0.144953] pinctrl core: initialized pinctrl subsystem</code><code class="target bg-success" id="L380">[    0.145372] DMI not present or invalid.</code><code class="target bg-success" id="L381">[    0.145625] NET: Registered protocol family 16</code><code class="target bg-success" id="L382">[    0.145881] audit: initializing netlink subsys (disabled)</code><code class="target bg-success" id="L383">[    0.146039] audit: type=2000 audit(0.144:1): state=initialized audit_enabled=0 res=1</code><code class="target bg-success" id="L384">[    0.146467] cpuidle: using governor menu</code><code class="target bg-success" id="L385">[    0.146597] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.</code><code class="target bg-success" id="L386">[    0.147145] DMA: preallocated 256 KiB pool for atomic allocations</code><code class="target bg-success" id="L387">[    0.148997] sh-pfc e6060000.pin-controller: r8a774b1_pfc support registered</code><code class="target bg-success" id="L388">[    0.164808] HugeTLB registered 2.00 MiB page size, pre-allocated 0 pages</code><code class="target bg-success" id="L389">[    0.168093] vgaarb: loaded</code><code class="target bg-success" id="L390">[    0.168236] SCSI subsystem initialized</code><code class="target bg-success" id="L391">[    0.168561] usbcore: registered new interface driver usbfs</code><code class="target bg-success" id="L392">[    0.168588] usbcore: registered new interface driver hub</code><code class="target bg-success" id="L393">[    0.168628] usbcore: registered new device driver usb</code><code class="target bg-success" id="L394">[    0.169174] media: Linux media interface: v0.10</code><code class="target bg-success" id="L395">[    0.169196] videodev: Linux video capture interface: v2.00</code><code class="target bg-success" id="L396">[    0.169237] pps_core: LinuxPPS API ver. 1 registered</code><code class="target bg-success" id="L397">[    0.169241] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti &lt;giometti@linux.it&gt;</code><code class="target bg-success" id="L398">[    0.169250] PTP clock support registered</code><code class="target bg-success" id="L399">[    0.169264] EDAC MC: Ver: 3.0.0</code><code class="target bg-success" id="L400">[    0.169624] sh_cmt e60f0000.timer: ch0: used for clock events</code><code class="target bg-success" id="L401">[    0.169637] sh_cmt e60f0000.timer: ch1: used as clock source</code><code class="target bg-success" id="L402">[    0.169645] clocksource: e60f0000.timer: mask: 0xffffffffffffffff max_cycles: 0x1ec02c0ac, max_idle_ns: 902748573997182 ns</code><code class="target bg-success" id="L403">[    0.169787] sh_cmt e6130000.timer: ch0: used for clock events</code><code class="target bg-success" id="L404">[    0.169793] sh_cmt e6130000.timer: ch1: used as clock source</code><code class="target bg-success" id="L405">[    0.169798] clocksource: e6130000.timer: mask: 0xffffffffffffffff max_cycles: 0x1ec02c0ac, max_idle_ns: 902748573997182 ns</code><code class="target bg-success" id="L406">[    0.170098] sh_tmu e61e0000.timer: ch0: used for clock events</code><code class="target bg-success" id="L407">[    0.170130] sh_tmu e61e0000.timer: ch1: used as clock source</code><code class="target bg-success" id="L408">[    0.170136] clocksource: e61e0000.timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 917405161258 ns</code><code class="target bg-success" id="L409">[    0.170217] sh_tmu e6fc0000.timer: ch0: used for clock events</code><code class="target bg-success" id="L410">[    0.170247] sh_tmu e6fc0000.timer: ch1: used as clock source</code><code class="target bg-success" id="L411">[    0.170252] clocksource: e6fc0000.timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 57337815666 ns</code><code class="target bg-success" id="L412">[    0.170330] sh_tmu e6fd0000.timer: ch0: used for clock events</code><code class="target bg-success" id="L413">[    0.170357] sh_tmu e6fd0000.timer: ch1: used as clock source</code><code class="target bg-success" id="L414">[    0.170363] clocksource: e6fd0000.timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 57337815666 ns</code><code class="target bg-success" id="L415">[    0.170437] sh_tmu e6fe0000.timer: ch0: used for clock events</code><code class="target bg-success" id="L416">[    0.170466] sh_tmu e6fe0000.timer: ch1: used as clock source</code><code class="target bg-success" id="L417">[    0.170472] clocksource: e6fe0000.timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 57337815666 ns</code><code class="target bg-success" id="L418">[    0.170545] sh_tmu ffc00000.timer: ch0: used for clock events</code><code class="target bg-success" id="L419">[    0.170574] sh_tmu ffc00000.timer: ch1: used as clock source</code><code class="target bg-success" id="L420">[    0.170579] clocksource: ffc00000.timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 57337815666 ns</code><code class="target bg-success" id="L421">[    0.170855] Advanced Linux Sound Architecture Driver Initialized.</code><code class="target bg-success" id="L422">[    0.171122] Bluetooth: Core ver 2.22</code><code class="target bg-success" id="L423">[    0.171148] NET: Registered protocol family 31</code><code class="target bg-success" id="L424">[    0.171152] Bluetooth: HCI device and connection manager initialized</code><code class="target bg-success" id="L425">[    0.171163] Bluetooth: HCI socket layer initialized</code><code class="target bg-success" id="L426">[    0.171171] Bluetooth: L2CAP socket layer initialized</code><code class="target bg-success" id="L427">[    0.171193] Bluetooth: SCO socket layer initialized</code><code class="target bg-success" id="L428">[    0.171451] clocksource: Switched to clocksource arch_sys_counter</code><code class="target bg-success" id="L429">[    0.171558] VFS: Disk quotas dquot_6.6.0</code><code class="target bg-success" id="L430">[    0.171596] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)</code><code class="target bg-success" id="L431">[    0.175361] NET: Registered protocol family 2</code><code class="target bg-success" id="L432">[    0.175884] tcp_listen_portaddr_hash hash table entries: 2048 (order: 5, 131072 bytes)</code><code class="target bg-success" id="L433">[    0.175971] TCP established hash table entries: 32768 (order: 6, 262144 bytes)</code><code class="target bg-success" id="L434">[    0.176142] TCP bind hash table entries: 32768 (order: 8, 1835008 bytes)</code><code class="target bg-success" id="L435">[    0.177163] TCP: Hash tables configured (established 32768 bind 32768)</code><code class="target bg-success" id="L436">[    0.177292] UDP hash table entries: 2048 (order: 6, 262144 bytes)</code><code class="target bg-success" id="L437">[    0.177464] UDP-Lite hash table entries: 2048 (order: 6, 262144 bytes)</code><code class="target bg-success" id="L438">[    0.177773] NET: Registered protocol family 1</code><code class="target bg-success" id="L439">[    0.178125] RPC: Registered named UNIX socket transport module.</code><code class="target bg-success" id="L440">[    0.178134] RPC: Registered udp transport module.</code><code class="target bg-success" id="L441">[    0.178137] RPC: Registered tcp transport module.</code><code class="target bg-success" id="L442">[    0.178141] RPC: Registered tcp NFSv4.1 backchannel transport module.</code><code class="target bg-success" id="L443">[    0.178858] hw perfevents: enabled with armv8_cortex_a57 PMU driver, 7 counters available</code><code class="target bg-success" id="L444">[    0.179250] kvm [1]: HYP mode not available</code><code class="target bg-success" id="L445">[    0.180043] Initialise system trusted keyrings</code><code class="target bg-success" id="L446">[    0.180177] workingset: timestamp_bits=46 max_order=20 bucket_order=0</code><code class="target bg-success" id="L447">[    0.184328] squashfs: version 4.0 (2009/01/31) Phillip Lougher</code><code class="target bg-success" id="L448">[    0.184736] NFS: Registering the id_resolver key type</code><code class="target bg-success" id="L449">[    0.184756] Key type id_resolver registered</code><code class="target bg-success" id="L450">[    0.184761] Key type id_legacy registered</code><code class="target bg-success" id="L451">[    0.184772] nfs4filelayout_init: NFSv4 File Layout Driver Registering...</code><code class="target bg-success" id="L452">[    0.187078] Key type asymmetric registered</code><code class="target bg-success" id="L453">[    0.187088] Asymmetric key parser 'x509' registered</code><code class="target bg-success" id="L454">[    0.187130] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 246)</code><code class="target bg-success" id="L455">[    0.187137] io scheduler noop registered</code><code class="target bg-success" id="L456">[    0.187141] io scheduler deadline registered</code><code class="target bg-success" id="L457">[    0.187235] io scheduler cfq registered (default)</code><code class="target bg-success" id="L458">[    0.187241] io scheduler mq-deadline registered</code><code class="target bg-success" id="L459">[    0.187245] io scheduler kyber registered</code><code class="target bg-success" id="L460">[    0.189254] sh-pfc e6060000.pin-controller: DT node must contain at least a function or config</code><code class="target bg-success" id="L461">[    0.190855] gpio_rcar e6050000.gpio: driving 16 GPIOs</code><code class="target bg-success" id="L462">[    0.190981] GPIO line 487 (lvds-connector-en-gpio) hogged as output/low</code><code class="target bg-success" id="L463">[    0.191104] gpio_rcar e6051000.gpio: driving 29 GPIOs</code><code class="target bg-success" id="L464">[    0.191308] gpio_rcar e6052000.gpio: driving 15 GPIOs</code><code class="target bg-success" id="L465">[    0.191626] gpio_rcar e6053000.gpio: driving 16 GPIOs</code><code class="target bg-success" id="L466">[    0.191842] gpio_rcar e6054000.gpio: driving 18 GPIOs</code><code class="target bg-success" id="L467">[    0.192033] gpio_rcar e6055000.gpio: driving 26 GPIOs</code><code class="target bg-success" id="L468">[    0.192136] GPIO line 370 (usb1-reset) hogged as output/low</code><code class="target bg-success" id="L469">[    0.192244] gpio_rcar e6055400.gpio: driving 32 GPIOs</code><code class="target bg-success" id="L470">[    0.192345] GPIO line 359 (pcie-en-gpio) hogged as input</code><code class="target bg-success" id="L471">[    0.192454] gpio_rcar e6055800.gpio: driving 4 GPIOs</code><code class="target bg-success" id="L472">[    0.193440] rcar-pcie fe000000.pcie: host bridge /soc/pcie@fe000000 ranges:</code><code class="target bg-success" id="L473">[    0.193462] rcar-pcie fe000000.pcie:    IO 0xfe100000..0xfe1fffff -&gt; 0x00000000</code><code class="target bg-success" id="L474">[    0.193476] rcar-pcie fe000000.pcie:   MEM 0xfe200000..0xfe3fffff -&gt; 0xfe200000</code><code class="target bg-success" id="L475">[    0.193487] rcar-pcie fe000000.pcie:   MEM 0x30000000..0x37ffffff -&gt; 0x30000000</code><code class="target bg-success" id="L476">[    0.193495] rcar-pcie fe000000.pcie:   MEM 0x38000000..0x3fffffff -&gt; 0x38000000</code><code class="target bg-success" id="L477">[    0.259230] rcar-pcie fe000000.pcie: PCIe link down</code><code class="target bg-success" id="L478">[    0.259406] rcar-pcie ee800000.pcie: host bridge /soc/pcie@ee800000 ranges:</code><code class="target bg-success" id="L479">[    0.259422] rcar-pcie ee800000.pcie:    IO 0xee900000..0xee9fffff -&gt; 0x00000000</code><code class="target bg-success" id="L480">[    0.259435] rcar-pcie ee800000.pcie:   MEM 0xeea00000..0xeebfffff -&gt; 0xeea00000</code><code class="target bg-success" id="L481">[    0.259489] rcar-pcie ee800000.pcie:   MEM 0xc0000000..0xc7ffffff -&gt; 0xc0000000</code><code class="target bg-success" id="L482">[    0.259497] rcar-pcie ee800000.pcie:   MEM 0xc8000000..0xcfffffff -&gt; 0xc8000000</code><code class="target bg-success" id="L483">[    0.327142] rcar-pcie ee800000.pcie: PCIe link down</code><code class="target bg-success" id="L484">[    0.327629] pwm-backlight backlight: backlight supply power not found, using dummy regulator</code><code class="target bg-success" id="L485">[    0.327687] pwm-backlight backlight: Linked as a consumer to regulator.0</code><code class="target bg-success" id="L486">[    0.364071] SuperH (H)SCI(F) driver initialized</code><code class="target bg-success" id="L487">[    0.364589] e6540000.serial: ttySC1 at MMIO 0xe6540000 (irq = 65, base_baud = 0) is a hscif</code><code class="target bg-success" id="L488">[    0.364787] serial serial0: tty port ttySC1 registered</code><code class="target bg-success" id="L489">[    0.365085] e6550000.serial: ttySC2 at MMIO 0xe6550000 (irq = 66, base_baud = 0) is a hscif</code><code class="target bg-success" id="L490">[    0.365544] e6e60000.serial: ttySC3 at MMIO 0xe6e60000 (irq = 148, base_baud = 0) is a scif</code><code class="target bg-success" id="L491">[    0.365930] e6e88000.serial: ttySC0 at MMIO 0xe6e88000 (irq = 149, base_baud = 0) is a scif</code><code class="target bg-success" id="L492">[    1.408705] console [ttySC0] enabled</code><code class="target bg-success" id="L493">[    1.414208] [drm] Supports vblank timestamp caching Rev 2 (21.10.2013).</code><code class="target bg-success" id="L494">[    1.420823] [drm] No driver support for vblank timestamp query.</code><code class="target bg-success" id="L495">[    1.427189] rcar-dw-hdmi fead0000.hdmi: Detected HDMI TX controller v2.01a with HDCP (DWC HDMI 2.0 TX PHY)</code><code class="target bg-success" id="L496">[    1.437181] rcar-dw-hdmi fead0000.hdmi: registered DesignWare HDMI I2C bus driver</code><code class="target bg-success" id="L497">[    1.450596] loop: module loaded</code><code class="target bg-success" id="L498">[    1.455438] spi_sh_msiof e6e90000.spi: DMA available</code><code class="target bg-success" id="L499">[    1.461093] libphy: Fixed MDIO Bus: probed</code><code class="target bg-success" id="L500">[    1.465393] tun: Universal TUN/TAP device driver, 1.6</code><code class="target bg-success" id="L501">[    1.470590] CAN device driver interface</code><code class="target bg-success" id="L502">[    1.475021] rcar_can e6c30000.can: device registered (IRQ146)</code><code class="target bg-success" id="L503">[    1.481149] rcar_can e6c38000.can: device registered (IRQ147)</code><code class="target bg-success" id="L504">[    1.487197] e1000e: Intel(R) PRO/1000 Network Driver - 3.2.6-k</code><code class="target bg-success" id="L505">[    1.493024] e1000e: Copyright(c) 1999 - 2015 Intel Corporation.</code><code class="target bg-success" id="L506">[    1.499737] libphy: ravb_mii: probed</code><code class="target bg-success" id="L507">[    1.504257] ravb e6800000.ethernet eth0: Base address at 0xe6800000, 74:90:50:00:00:24, IRQ 143.</code><code class="target bg-success" id="L508">[    1.513450] VFIO - User Level meta-driver version: 0.3</code><code class="target bg-success" id="L509">[    1.518725] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver</code><code class="target bg-success" id="L510">[    1.525249] ehci-pci: EHCI PCI platform driver</code><code class="target bg-success" id="L511">[    1.529743] ehci-platform: EHCI generic platform driver</code><code class="target bg-success" id="L512">[    1.535372] ehci-platform ee0a0100.usb: EHCI Host Controller</code><code class="target bg-success" id="L513">[    1.541051] ehci-platform ee0a0100.usb: new USB bus registered, assigned bus number 1</code><code class="target bg-success" id="L514">[    1.549104] ehci-platform ee0a0100.usb: irq 188, io mem 0xee0a0100</code><code class="target bg-success" id="L515">[    1.567461] ehci-platform ee0a0100.usb: USB 2.0 started, EHCI 1.10</code><code class="target bg-success" id="L516">[    1.574024] hub 1-0:1.0: USB hub found</code><code class="target bg-success" id="L517">[    1.577786] hub 1-0:1.0: 1 port detected</code><code class="target bg-success" id="L518">[    1.582020] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver</code><code class="target bg-success" id="L519">[    1.588214] ohci-pci: OHCI PCI platform driver</code><code class="target bg-success" id="L520">[    1.592690] ohci-platform: OHCI generic platform driver</code><code class="target bg-success" id="L521">[    1.598259] ohci-platform ee0a0000.usb: Generic Platform OHCI controller</code><code class="target bg-success" id="L522">[    1.604972] ohci-platform ee0a0000.usb: new USB bus registered, assigned bus number 2</code><code class="target bg-success" id="L523">[    1.613034] ohci-platform ee0a0000.usb: irq 188, io mem 0xee0a0000</code><code class="target bg-success" id="L524">[    1.706461] hub 2-0:1.0: USB hub found</code><code class="target bg-success" id="L525">[    1.710222] hub 2-0:1.0: 1 port detected</code><code class="target bg-success" id="L526">[    1.714891] xhci-hcd ee000000.usb: xHCI Host Controller</code><code class="target bg-success" id="L527">[    1.720131] xhci-hcd ee000000.usb: new USB bus registered, assigned bus number 3</code><code class="target bg-success" id="L528">[    1.743560] xhci-hcd ee000000.usb: hcc params 0x014051ce hci version 0x100 quirks 0x0000000000830410</code><code class="target bg-success" id="L529">[    1.752838] xhci-hcd ee000000.usb: irq 185, io mem 0xee000000</code><code class="target bg-success" id="L530">[    1.759074] hub 3-0:1.0: USB hub found</code><code class="target bg-success" id="L531">[    1.762836] hub 3-0:1.0: 1 port detected</code><code class="target bg-success" id="L532">[    1.766923] xhci-hcd ee000000.usb: xHCI Host Controller</code><code class="target bg-success" id="L533">[    1.772150] xhci-hcd ee000000.usb: new USB bus registered, assigned bus number 4</code><code class="target bg-success" id="L534">[    1.779548] xhci-hcd ee000000.usb: Host supports USB 3.0 SuperSpeed</code><code class="target bg-success" id="L535">[    1.785854] usb usb4: We don't know the algorithms for LPM for this host, disabling LPM.</code><code class="target bg-success" id="L536">[    1.794226] hub 4-0:1.0: USB hub found</code><code class="target bg-success" id="L537">[    1.797986] hub 4-0:1.0: 1 port detected</code><code class="target bg-success" id="L538">[    1.802304] usbcore: registered new interface driver usb-storage</code><code class="target bg-success" id="L539">[    1.808852] renesas_usbhs e6590000.usb: host probed</code><code class="target bg-success" id="L540">[    1.813737] renesas_usbhs e6590000.usb: no transceiver found</code><code class="target bg-success" id="L541">[    1.819507] renesas_usbhs e6590000.usb: gadget probed</code><code class="target bg-success" id="L542">[    1.824736] renesas_usbhs e6590000.usb: probed</code><code class="target bg-success" id="L543">[    1.830078] renesas_usb3 ee020000.usb: probed with phy</code><code class="target bg-success" id="L544">[    1.835642] usbcore: registered new interface driver usbtouchscreen</code><code class="target bg-success" id="L545">[    1.842016] i2c /dev entries driver</code><code class="target bg-success" id="L546">[    1.846232] i2c-rcar e6510000.i2c: probed</code><code class="target bg-success" id="L547">[    1.850737] pca953x 4-0020: 4-0020 supply vcc not found, using dummy regulator</code><code class="target bg-success" id="L548">[    1.858006] pca953x 4-0020: Linked as a consumer to regulator.0</code><code class="target bg-success" id="L549">[    1.868130] i2c-rcar e66d8000.i2c: probed</code><code class="target bg-success" id="L550">[    1.875964] rcar_gen3_thermal e6198000.thermal: is using hardware FUSE values</code><code class="target bg-success" id="L551">[    1.887343] rcar_gen3_thermal e6198000.thermal: TSC0: Loaded 1 trip points</code><code class="target bg-success" id="L552">[    1.898326] rcar_gen3_thermal e6198000.thermal: TSC1: Loaded 1 trip points</code><code class="target bg-success" id="L553">[    1.909309] rcar_gen3_thermal e6198000.thermal: TSC2: Loaded 3 trip points</code><code class="target bg-success" id="L554">[    1.915473] usb 1-1: new high-speed USB device number 2 using ehci-platform</code><code class="target bg-success" id="L555">[    1.923376] Bluetooth: HCI UART driver ver 2.3</code><code class="target bg-success" id="L556">[    1.927818] Bluetooth: HCI UART protocol H4 registered</code><code class="target bg-success" id="L557">[    1.932952] Bluetooth: HCI UART protocol BCSP registered</code><code class="target bg-success" id="L558">[    1.938280] Bluetooth: HCI UART protocol LL registered</code><code class="target bg-success" id="L559">[    1.943416] Bluetooth: HCI UART protocol ATH3K registered</code><code class="target bg-success" id="L560">[    1.948833] Bluetooth: HCI UART protocol Three-wire (H5) registered</code><code class="target bg-success" id="L561">[    1.955696] cpufreq: cpufreq_online: CPU0: Running at unlisted freq: 1499999 KHz</code><code class="target bg-success" id="L562">[    1.963101] cpufreq: cpufreq_online: CPU0: Unlisted initial frequency changed to: 1500000 KHz</code><code class="target bg-success" id="L563">[    1.972610] renesas_sdhi_internal_dmac ee100000.sd: Got CD GPIO</code><code class="target bg-success" id="L564">[    1.978646] renesas_sdhi_internal_dmac ee100000.sd: Linked as a consumer to regulator.2</code><code class="target bg-success" id="L565">[    1.986732] renesas_sdhi_internal_dmac ee100000.sd: Dropping the link to regulator.2</code><code class="target bg-success" id="L566">[    1.995287] renesas_sdhi_internal_dmac ee160000.sd: Linked as a consumer to regulator.2</code><code class="target bg-success" id="L567">[    2.003336] renesas_sdhi_internal_dmac ee160000.sd: Linked as a consumer to regulator.1</code><code class="target bg-success" id="L568">[    2.022361] sh_tmu e61e0000.timer: ch0: used for oneshot clock events</code><code class="target bg-success" id="L569">[    2.060391] renesas_sdhi_internal_dmac ee160000.sd: mmc0 base at 0xee160000 max clock rate 200 MHz</code><code class="target bg-success" id="L570">[    2.074296] hub 1-1:1.0: USB hub found</code><code class="target bg-success" id="L571">[    2.074348] hub 1-1:1.0: 2 ports detected</code><code class="target bg-success" id="L572">[    2.084824] usbcore: registered new interface driver usbhid</code><code class="target bg-success" id="L573">[    2.085753] Bluetooth: hci0: change remote baud rate command in firmware</code><code class="target bg-success" id="L574">[    2.097094] usbhid: USB HID core driver</code><code class="target bg-success" id="L575">[    2.101142] optee: probing for conduit method from DT.</code><code class="target bg-success" id="L576">[    2.106280] optee: api uid mismatch</code><code class="target bg-success" id="L577">[    2.113293] rcar_sound ec500000.sound: probed</code><code class="target bg-success" id="L578">[    2.118394] NET: Registered protocol family 17</code><code class="target bg-success" id="L579">[    2.122901] Bridge firewalling registered</code><code class="target bg-success" id="L580">[    2.126912] can: controller area network core (rev 20170425 abi 9)</code><code class="target bg-success" id="L581">[    2.133198] NET: Registered protocol family 29</code><code class="target bg-success" id="L582">[    2.137668] can: raw protocol (rev 20170425)</code><code class="target bg-success" id="L583">[    2.141938] can: broadcast manager protocol (rev 20170425 t)</code><code class="target bg-success" id="L584">[    2.146285] mmc0: new HS400 MMC card at address 0001</code><code class="target bg-success" id="L585">[    2.150764] mmcblk0: mmc0:0001 R1J57L 29.1 GiB </code><code class="target bg-success" id="L586">[    2.150916] mmcblk0boot0: mmc0:0001 R1J57L partition 1 8.00 MiB</code><code class="target bg-success" id="L587">[    2.151076] mmcblk0boot1: mmc0:0001 R1J57L partition 2 8.00 MiB</code><code class="target bg-success" id="L588">[    2.151245] mmcblk0rpmb: mmc0:0001 R1J57L partition 3 4.00 MiB, chardev (244:0)</code><code class="target bg-success" id="L589">[    2.155848] random: fast init done</code><code class="target bg-success" id="L590">[    2.162174]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11</code><code class="target bg-success" id="L591">[    2.184946] can: netlink gateway (rev 20170425) max_hops=1</code><code class="target bg-success" id="L592">[    2.190763] Bluetooth: RFCOMM TTY layer initialized</code><code class="target bg-success" id="L593">[    2.196305] Bluetooth: RFCOMM socket layer initialized</code><code class="target bg-success" id="L594">[    2.201456] Bluetooth: RFCOMM ver 1.11</code><code class="target bg-success" id="L595">[    2.205210] Bluetooth: BNEP (Ethernet Emulation) ver 1.3</code><code class="target bg-success" id="L596">[    2.210517] Bluetooth: BNEP filters: protocol multicast</code><code class="target bg-success" id="L597">[    2.215742] Bluetooth: BNEP socket layer initialized</code><code class="target bg-success" id="L598">[    2.220701] Bluetooth: HIDP (Human Interface Emulation) ver 1.2</code><code class="target bg-success" id="L599">[    2.226618] Bluetooth: HIDP socket layer initialized</code><code class="target bg-success" id="L600">[    2.231626] Key type dns_resolver registered</code><code class="target bg-success" id="L601">[    2.236657] registered taskstats version 1</code><code class="target bg-success" id="L602">[    2.240751] Loading compiled-in X.509 certificates</code><code class="target bg-success" id="L603">[    2.252565] thermal emergency: set temperature to 110 celsius</code><code class="target bg-success" id="L604">[    2.258359] thermal emergency: shutdown target cpus 1</code><code class="target bg-success" id="L605">[    2.263405] thermal emergency: freq scaled target cpus 0</code><code class="target bg-success" id="L606">[    2.269885] renesas_irqc e61c0000.interrupt-controller: driving 6 irqs</code><code class="target bg-success" id="L607">[    2.279371] phy_rcar_gen3_usb2 ee080200.usb-phy: Linked as a consumer to regulator.3</code><code class="target bg-success" id="L608">[    2.287548] [drm] Supports vblank timestamp caching Rev 2 (21.10.2013).</code><code class="target bg-success" id="L609">[    2.294159] [drm] No driver support for vblank timestamp query.</code><code class="target bg-success" id="L610">[    2.301005] [drm] Initialized rcar-du 1.0.0 20130110 for feb00000.display on minor 0</code><code class="target bg-success" id="L611">[    2.308748] [drm] Device feb00000.display probed</code><code class="target bg-success" id="L612">[    2.313395] [drm] Cannot find any crtc or sizes</code><code class="target bg-success" id="L613">[    2.318358] [drm] Cannot find any crtc or sizes</code><code class="target bg-success" id="L614">[    2.343645] ehci-platform ee080100.usb: EHCI Host Controller</code><code class="target bg-success" id="L615">[    2.349320] ehci-platform ee080100.usb: new USB bus registered, assigned bus number 5</code><code class="target bg-success" id="L616">[    2.357540] ehci-platform ee080100.usb: irq 187, io mem 0xee080100</code><code class="target bg-success" id="L617">[    2.379637] ehci-platform ee080100.usb: USB 2.0 started, EHCI 1.10</code><code class="target bg-success" id="L618">[    2.386308] hub 5-0:1.0: USB hub found</code><code class="target bg-success" id="L619">[    2.390071] hub 5-0:1.0: 1 port detected</code><code class="target bg-success" id="L620">[    2.394452] ohci-platform ee080000.usb: Generic Platform OHCI controller</code><code class="target bg-success" id="L621">[    2.401165] ohci-platform ee080000.usb: new USB bus registered, assigned bus number 6</code><code class="target bg-success" id="L622">[    2.409331] ohci-platform ee080000.usb: irq 187, io mem 0xee080000</code><code class="target bg-success" id="L623">[    2.506759] hub 6-0:1.0: USB hub found</code><code class="target bg-success" id="L624">[    2.510523] hub 6-0:1.0: 1 port detected</code><code class="target bg-success" id="L625">[    2.515259] renesas_sdhi_internal_dmac ee100000.sd: Got CD GPIO</code><code class="target bg-success" id="L626">[    2.521296] renesas_sdhi_internal_dmac ee100000.sd: Linked as a consumer to regulator.2</code><code class="target bg-success" id="L627">[    2.529338] renesas_sdhi_internal_dmac ee100000.sd: Linked as a consumer to regulator.5</code><code class="target bg-success" id="L628">[    2.586475] renesas_sdhi_internal_dmac ee100000.sd: mmc1 base at 0xee100000 max clock rate 200 MHz</code><code class="target bg-success" id="L629">[    2.596173] renesas_sdhi_internal_dmac ee140000.sd: Linked as a consumer to regulator.4</code><code class="target bg-success" id="L630">[    2.727778] renesas_sdhi_internal_dmac ee140000.sd: mmc2 base at 0xee140000 max clock rate 200 MHz</code><code class="target bg-success" id="L631">[    2.737495] asoc-audio-graph-card sound: i2s-hifi &lt;-&gt; rsnd-dai.0 mapping ok</code><code class="target bg-success" id="L632">[    2.744616] asoc-audio-graph-card sound: pcm5102a-hifi &lt;-&gt; rsnd-dai.1 mapping ok</code><code class="target bg-success" id="L633">[    2.752019] asoc-audio-graph-card sound: ASoC: no DMI vendor name!</code><code class="target bg-success" id="L634">[    2.758590] renesas_sdhi_internal_dmac ee140000.sd: card claims to support voltages below defined range</code><code class="target bg-success" id="L635">[    2.768785] hctosys: unable to open rtc device (rtc0)</code><code class="target bg-success" id="L636">[    2.788198] mmc2: new high speed SDIO card at address 0001</code><code class="target bg-success" id="L637">[    2.848626] RTL8211E Gigabit Ethernet e6800000.ethernet-ffffffff:00: attached PHY driver [RTL8211E Gigabit Ethernet] (mii_bus:phy_addr=e6800000.ethernet-ffffffff:00, irq=192)</code><code class="target bg-success" id="L638">[    2.903189] mmc1: new ultra high speed SDR104 SDHC card at address aaaa</code><code class="target bg-success" id="L639">[    2.910231] mmcblk1: mmc1:aaaa AGGCD 29.7 GiB </code><code class="target bg-success" id="L640">[    2.917492]  mmcblk1: p1 p2</code><code class="target bg-success" id="L641">[    4.458695] ravb e6800000.ethernet eth0: Link is Up - 100Mbps/Full - flow control rx/tx</code><code class="target bg-success" id="L642">[    4.479549] Sending DHCP requests ., OK</code><code class="target bg-success" id="L643">[    4.499399] IP-Config: Got DHCP answer from 192.168.5.108, my address is 192.168.5.118</code><code class="target bg-success" id="L644">[    4.507315] IP-Config: Complete:</code><code class="target bg-success" id="L645">[    4.510541]      device=eth0, hwaddr=74:90:50:00:00:24, ipaddr=192.168.5.118, mask=255.255.255.0, gw=192.168.5.108</code><code class="target bg-success" id="L646">[    4.520889]      host=192.168.5.118, domain=, nis-domain=(none)</code><code class="target bg-success" id="L647">[    4.526804]      bootserver=192.168.5.108, rootserver=192.168.5.40, rootpath=</code><code class="target bg-success" id="L648">[    4.526806]      nameserver0=192.168.5.108</code><code class="target bg-success" id="L649">[    4.538127] cfg80211: Loading compiled-in X.509 certificates for regulatory database</code><code class="target bg-success" id="L650">[    4.546913] cfg80211: Loaded X.509 cert 'sforshee: 00b28ddf47aef9cea7'</code><code class="target bg-success" id="L651">[    4.556034] ALSA device list:</code><code class="target bg-success" id="L652">[    4.559000]   #0: rcar-sound</code><code class="target bg-success" id="L653">[    4.568504] VFS: Mounted root (nfs filesystem) on device 0:15.</code><code class="target bg-success" id="L654">[    4.574694] devtmpfs: mounted</code><code class="target bg-success" id="L655">[    4.577973] Freeing unused kernel memory: 576K</code><code class="target bg-success" id="L656">[    4.582499] Run /sbin/init as init process</code><code class="target bg-success" id="L657">[    5.277063] systemd[1]: System time before build time, advancing clock.</code><code class="target bg-success" id="L658">[    5.409730] systemd[1]: systemd 234 running in system mode. (+PAM -AUDIT -SELINUX +IMA -APPARMOR +SMACK +SYSVINIT +UTMP -LIBCRYPTSETUP -GCRYPT -GNUTLS +ACL +XZ -LZ4 -SECCOMP +BLKID -ELFUTILS +KMOD -IDN2 -IDN default-hierarchy=hybrid)</code><code class="target bg-success" id="L659">[    5.430865] systemd[1]: Detected architecture arm64.</code><code class="target bg-success" id="L660"></code><code class="target bg-success" id="L661">Welcome to [1mPoky (Yocto Project Reference Distro) 2.4.3 (rocko)[0m!</code><code class="target bg-success" id="L662"></code><code class="target bg-success" id="L663">[    5.461019] systemd[1]: Set hostname to &lt;hihope-rzg2n&gt;.</code><code class="target bg-success" id="L664">[    5.467671] random: systemd: uninitialized urandom read (16 bytes read)</code><code class="target bg-success" id="L665">[    5.474324] systemd[1]: Initializing machine ID from random generator.</code><code class="target bg-success" id="L666">[    6.047303] systemd[1]: Configuration file /lib/systemd/system/watchdog.service is marked executable. Please remove executable permission bits. Proceeding anyway.</code><code class="target bg-success" id="L667">[    6.416579] random: systemd: uninitialized urandom read (16 bytes read)</code><code class="target bg-success" id="L668">[    6.423601] systemd[1]: Started Dispatch Password Requests to Console Directory Watch.</code><code class="target bg-success" id="L669">[[0;32m  OK  [0m] Started Dispatch Password Requests to Console Directory Watch.</code><code class="target bg-success" id="L670">[    6.447633] random: systemd: uninitialized urandom read (16 bytes read)</code><code class="target bg-success" id="L671">[    6.455010] systemd[1]: Listening on Journal Socket.</code><code class="target bg-success" id="L672">[[0;32m  OK  [0m] Listening on Journal Socket.</code><code class="target bg-success" id="L673">[    6.475854] random: systemd: uninitialized urandom read (16 bytes read)</code><code class="target bg-success" id="L674">[    6.482587] systemd[1]: Listening on Network Service Netlink Socket.</code><code class="target bg-success" id="L675">[[0;32m  OK  [0m] Listening on Network Service Netlink Socket.</code><code class="target bg-success" id="L676">[    6.503699] random: systemd: uninitialized urandom read (16 bytes read)</code><code class="target bg-success" id="L677">[    6.511689] systemd[1]: Created slice System Slice.</code><code class="target bg-success" id="L678">[[0;32m  OK  [0m] Created slice System Slice.</code><code class="target bg-success" id="L679">[    6.531922] random: systemd: uninitialized urandom read (16 bytes read)</code><code class="target bg-success" id="L680">[    6.540817] systemd[1]: Mounting POSIX Message Queue File System...</code><code class="target bg-success" id="L681">         Mounting POSIX Message Queue File System...</code><code class="target bg-success" id="L682">[[0;32m  OK  [0m] Created slice system-serial\x2dgetty.slice.</code><code class="target bg-success" id="L683">         Mounting Huge Pages File System...</code><code class="target bg-success" id="L684">[[0;32m  OK  [0m] Reached target Host and Network Name Lookups.</code><code class="target bg-success" id="L685">[[0;32m  OK  [0m] Reached target Remote File Systems.</code><code class="target bg-success" id="L686">[[0;32m  OK  [0m] Reached target Swap.</code><code class="target bg-success" id="L687">         Mounting Temporary Directory (/tmp)...</code><code class="target bg-success" id="L688">[[0;32m  OK  [0m] Listening on udev Kernel Socket.</code><code class="target bg-success" id="L689">[[0;32m  OK  [0m] Created slice User and Session Slice.</code><code class="target bg-success" id="L690">         Mounting Kernel Debug File System...</code><code class="target bg-success" id="L691">[[0;32m  OK  [0m] Listening on Journal Socket (/dev/log).</code><code class="target bg-success" id="L692">[[0;32m  OK  [0m] Listening on /dev/initctl Compatibility Named Pipe.</code><code class="target bg-success" id="L693">[[0;32m  OK  [0m] Started Forward Password Requests to Wall Directory Watch.</code><code class="target bg-success" id="L694">[[0;32m  OK  [0m] Reached target Paths.</code><code class="target bg-success" id="L695">[[0;32m  OK  [0m] Created slice system-getty.slice.</code><code class="target bg-success" id="L696">         Starting Remount Root and Kernel File Systems...</code><code class="target bg-success" id="L697">         Starting Load Kernel Modules...</code><code class="target bg-success" id="L698">[[0;32m  OK  [0m] Listening on Journal Audit Socket.</code><code class="target bg-success" id="L699">         Starting Journal Service...</code><code class="target bg-success" id="L700">[[0;32m  OK  [0m] Listening on udev Control Socket.</code><code class="target bg-success" id="L701">[[0;32m  OK  [0m] Reached target Slices.</code><code class="target bg-success" id="L702">[[0;32m  OK  [0m] Mounted Kernel Debug[    6.892562] mmngr: loading out-of-tree module taints kernel.</code><code class="target bg-success" id="L703"> File System.</code><code class="target bg-success" id="L704">[    6.900675] rgnmm_drv mmngr: assigned reserved memory node linux,multimedia@70000000</code><code class="target bg-success" id="L705">[[0;32m  OK  [0m] Mounted POSIX Message Queue File System.</code><code class="target bg-success" id="L706">[[0;32m  OK  [0m] Mounted Huge Pages File System.</code><code class="target bg-success" id="L707">[[0;32m  OK  [0m] Mounted Temporary Directory (/tmp).</code><code class="target bg-success" id="L708">[[0;32m  OK  [0m] Started Remount Root and Kernel File Systems.</code><code class="target bg-success" id="L709">[[0;32m  OK  [0m] Started Journal Service.</code><code class="target bg-success" id="L710">         Starting Rebuild Hardware Database...</code><code class="target bg-success" id="L711">         Starting Flush Journal to Persistent Storage...</code><code class="target bg-success" id="L712">         Starting Create System Users...</code><code class="target bg-success" id="L713">[    7.224341] random: crng init done</code><code class="target bg-success" id="L714">[    7.227756] random: 4 urandom warning(s) missed due to ratelimiting</code><code class="target bg-success" id="L715">[    7.267382] systemd-journald[341]: Received request to flush runtime journal from PID 1</code><code class="target bg-success" id="L716">[[0;32m  OK  [0m] Started Flush Journal to Persistent Storage.</code><code class="target bg-success" id="L717">[    7.344074] PVR_K:  340: HTBInit: HTBufferSizeInKB = 64</code><code class="target bg-success" id="L718">[    7.357388] PVR_K:  340: RGX Device initialised with BVNC 15.5.1.64</code><code class="target bg-success" id="L719">[    7.367654] pvrsrvkm fd000000.gsx: opp[1/4]: (200000000 Hz, 830000 uV)</code><code class="target bg-success" id="L720">[    7.381442] pvrsrvkm fd000000.gsx: opp[2/4]: (300000000 Hz, 830000 uV)</code><code class="target bg-success" id="L721">[    7.389468] pvrsrvkm fd000000.gsx: opp[3/4]: (400000000 Hz, 830000 uV)</code><code class="target bg-success" id="L722">[    7.396017] pvrsrvkm fd000000.gsx: opp[4/4]: (600000000 Hz, 830000 uV)</code><code class="target bg-success" id="L723">[    7.403120] [drm] Initialized pvr 1.10.5187610 20170530 for fd000000.gsx on minor 1</code><code class="target bg-success" id="L724">[[0;32m  OK  [0m] Started Create System Users.</code><code class="target bg-success" id="L725">         Starting Create Static Device Nodes in /dev...</code><code class="target bg-success" id="L726">[[0;32m  OK  [0m] Started Load Kernel Modules.</code><code class="target bg-success" id="L727">         Starting Apply Kernel Variables...</code><code class="target bg-success" id="L728">         Mounting Kernel Configuration File System...</code><code class="target bg-success" id="L729">[[0;32m  OK  [0m] Mounted Kernel Configuration File System.</code><code class="target bg-success" id="L730">[[0;32m  OK  [0m] Started Apply Kernel Variables.</code><code class="target bg-success" id="L731">[[0;32m  OK  [0m] Started Create Static Device Nodes in /dev.</code><code class="target bg-success" id="L732">[[0;32m  OK  [0m] Reached target Local File Systems (Pre).</code><code class="target bg-success" id="L733">         Mounting /var/volatile...</code><code class="target bg-success" id="L734">         Starting udev Kernel Device Manager...</code><code class="target bg-success" id="L735">[[0;32m  OK  [0m] Mounted /var/volatile.</code><code class="target bg-success" id="L736">         Starting Load/Save Random Seed...</code><code class="target bg-success" id="L737">[[0;32m  OK  [0m] Reached target Local File Systems.</code><code class="target bg-success" id="L738">         Starting Create Volatile Files and Directories...</code><code class="target bg-success" id="L739">         Starting Rebuild Journal Catalog...</code><code class="target bg-success" id="L740">         Starting Rebuild Dynamic Linker Cache...</code><code class="target bg-success" id="L741">[[0;32m  OK  [0m] Started Load/Save Random Seed.</code><code class="target bg-success" id="L742">[[0;32m  OK  [0m] Started Create Volatile Files and Directories.</code><code class="target bg-success" id="L743">         Starting Update UTMP about System Boot/Shutdown...</code><code class="target bg-success" id="L744">[[0m[0;31m*     [0m] (1 of 6) A start job is running for…nel Device Manager (7s / 1min 31s)[K[[0;1;31m*[0m[0;31m*    [0m] (1 of 6) A start job is running for…nel Device Manager (7s / 1min 31s)[K[[0;31m*[0;1;31m*[0m[0;31m*   [0m] (1 of 6) A start job is running for…nel Device Manager (8s / 1min 31s)[K[ [0;31m*[0;1;31m*[0m[0;31m*  [0m] (2 of 6) A start job is running for dev-ttySC0.device (8s / 1min 30s)[K[  [0;31m*[0;1;31m*[0m[0;31m* [0m] (2 of 6) A start job is running for dev-ttySC0.device (9s / 1min 30s)[K[   [0;31m*[0;1;31m*[0m[0;31m*[0m] (2 of 6) A start job is running for dev-ttySC0.device (10s / 1min 30s)[K[    [0;31m*[0;1;31m*[0m] (3 of 6) A start job is running for…Hardware Database (10s / 1min 30s)[K[     [0;31m*[0m] (3 of 6) A start job is running for…Hardware Database (11s / 1min 30s)[K[    [0;31m*[0;1;31m*[0m] (3 of 6) A start job is running for…Hardware Database (11s / 1min 30s)[K[   [0;31m*[0;1;31m*[0m[0;31m*[0m] (4 of 6) A start job is running for…amic Linker Cache (12s / no limit)[K[  [0;31m*[0;1;31m*[0m[0;31m* [0m] (4 of 6) A start job is running for…amic Linker Cache (13s / no limit)[K[ [0;31m*[0;1;31m*[0m[0;31m*  [0m] (4 of 6) A start job is running for…amic Linker Cache (13s / no limit)[K[[0;31m*[0;1;31m*[0m[0;31m*   [0m] (5 of 6) A start job is running for…tem Boot/Shutdown (14s / no limit)[K[[0;1;31m*[0m[0;31m*    [0m] (5 of 6) A start job is running for…tem Boot/Shutdown (14s / no limit)[K[[0m[0;31m*     [0m] (5 of 6) A start job is running for…tem Boot/Shutdown (15s / no limit)[K[[0;1;31m*[0m[0;31m*    [0m] (6 of 6) A start job is running for…d Journal Catalog (16s / 1min 31s)[K[[0;31m*[0;1;31m*[0m[0;31m*   [0m] (6 of 6) A start job is running for…d Journal Catalog (16s / 1min 31s)[K[ [0;31m*[0;1;31m*[0m[0;31m*  [0m] (6 of 6) A start job is running for…d Journal Catalog (17s / 1min 31s)[K[  [0;31m*[0;1;31m*[0m[0;31m* [0m] (1 of 6) A start job is running for…el Device Manager (17s / 1min 31s)[K[   [0;31m*[0;1;31m*[0m[0;31m*[0m] (1 of 6) A start job is running for…el Device Manager (18s / 1min 31s)[K[    [0;31m*[0;1;31m*[0m] (1 of 6) A start job is running for…el Device Manager (19s / 1min 31s)[K[     [0;31m*[0m] (2 of 6) A start job is running for dev-ttySC0.device (19s / 1min 30s)[K[    [0;31m*[0;1;31m*[0m] (2 of 6) A start job is running for dev-ttySC0.device (20s / 1min 30s)[K[   [0;31m*[0;1;31m*[0m[0;31m*[0m] (2 of 6) A start job is running for dev-ttySC0.device (20s / 1min 30s)[K[  [0;31m*[0;1;31m*[0m[0;31m* [0m] (3 of 6) A start job is running for…Hardware Database (21s / 1min 30s)[K[ [0;31m*[0;1;31m*[0m[0;31m*  [0m] (3 of 6) A start job is running for…Hardware Database (21s / 1min 30s)[K[[0;31m*[0;1;31m*[0m[0;31m*   [0m] (3 of 6) A start job is running for…Hardware Database (22s / 1min 30s)[K[[0;1;31m*[0m[0;31m*    [0m] (4 of 6) A start job is running for…amic Linker Cache (22s / no limit)[K[[0m[0;31m*     [0m] (4 of 6) A start job is running for…amic Linker Cache (23s / no limit)[K[[0;1;31m*[0m[0;31m*    [0m] (4 of 6) A start job is running for…amic Linker Cache (23s / no limit)[K[[0;31m*[0;1;31m*[0m[0;31m*   [0m] (5 of 6) A start job is running for…tem Boot/Shutdown (24s / no limit)[K[ [0;31m*[0;1;31m*[0m[0;31m*  [0m] (5 of 6) A start job is running for…tem Boot/Shutdown (24s / no limit)[K[  [0;31m*[0;1;31m*[0m[0;31m* [0m] (5 of 6) A start job is running for…tem Boot/Shutdown (25s / no limit)[K[   [0;31m*[0;1;31m*[0m[0;31m*[0m] (6 of 6) A start job is running for…d Journal Catalog (25s / 1min 31s)[K[    [0;31m*[0;1;31m*[0m] (6 of 6) A start job is running for…d Journal Catalog (26s / 1min 31s)[K[     [0;31m*[0m] (6 of 6) A start job is running for…d Journal Catalog (26s / 1min 31s)[K[    [0;31m*[0;1;31m*[0m] (1 of 6) A start job is running for…el Device Manager (27s / 1min 31s)[K[   [0;31m*[0;1;31m*[0m[0;31m*[0m] (1 of 6) A start job is running for…el Device Manager (27s / 1min 31s)[K[  [0;31m*[0;1;31m*[0m[0;31m* [0m] (1 of 6) A start job is running for…el Device Manager (28s / 1min 31s)[K[ [0;31m*[0;1;31m*[0m[0;31m*  [0m] (2 of 6) A start job is running for dev-ttySC0.device (28s / 1min 30s)[   35.811565] wlan-en-regulator: disabling</code><code class="target bg-success" id="L745">[K[[0;31m*[0;1;31m*[0m[0;31m*   [0m] (2 of 6) A start job is running for dev-ttySC0.device (29s / 1min 30s)[K[[0;1;31m*[0m[0;31m*    [0m] (2 of 6) A start job is running for dev-ttySC0.device (29s / 1min 30s)[K[[0m[0;31m*     [0m] (3 of 6) A start job is running for…Hardware Database (30s / 1min 30s)[K[[0;1;31m*[0m[0;31m*    [0m] (3 of 6) A start job is running for…Hardware Database (30s / 1min 30s)[K[[0;31m*[0;1;31m*[0m[0;31m*   [0m] (3 of 6) A start job is running for…Hardware Database (31s / 1min 30s)[  189.411592] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L746">[  189.411637] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L747">[  189.411675] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L748">[  189.411686] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L749">[  189.411693] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L750">[  189.411699] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L751">[  189.411714] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L752">[  189.411717] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L753">[  189.411721] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L754">[  189.411724] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L755">[  189.411744] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L756">[  189.411769] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L757">[  189.411773] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L758">[  189.411775] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L759">[  189.411779] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L760">[  189.411782] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L761">[  189.411785] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L762">[  189.411789] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L763">[  189.411792] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L764">[  189.411796] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L765">[  189.411800] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L766">[  189.411803] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L767">[  189.411806] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L768">[  189.411810] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L769">[  189.411813] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L770">[  189.411817] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L771">[  189.411820] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L772">[  189.411824] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L773">[  189.411827] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L774">[  189.411831] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L775">[  189.411834] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L776">[  189.411838] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L777">[  189.411842] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L778">[  207.843646] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L779">[  216.035633] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L780">[  218.595635] nfs: server 192.168.5.40 not responding, still trying</code><code class="target bg-success" id="L781">[  222.693075] nfs: server 192.168.5.40 OK</code><code class="target bg-success" id="L782">[  222.693094] nfs: server 192.168.5.40 OK</code><code class="target bg-success" id="L783">[  222.697705] nfs: server 192.168.5.40 OK</code><code class="target bg-success" id="L784">[  222.699466] nfs: server 192.168.5.40 OK</code><code class="target bg-success" id="L785">[  222.910741] nfs: server 192.168.5.40 OK</code><code class="exception bg-danger" id="L786">auto-login-action timed out after 255 seconds</code><code class="debug" id="L787">end: 2.4.4 auto-login-action (duration 00:04:15) [common]</code><a href="http://localhost:10080/results/testcase/undefined"><code class="results bg-primary results_failed" id="results_lava_auto-login-action_F_fail"><span>case: auto-login-action</span><br><span>definition: lava</span><br><span>duration: 255.00</span><br><span>extra: ...</span><br><span>level: 2.4.4</span><br><span>namespace: common</span><br><span>result: fail</span><br></code></a><code class="error bg-danger" id="L789">uboot-retry failed: 1 of 1 attempts. 'auto-login-action timed out after 255 seconds'</code><code class="exception bg-danger" id="L790">auto-login-action timed out after 255 seconds</code><code class="debug" id="L791">end: 2.4 uboot-retry (duration 00:04:59) [common]</code><a href="http://localhost:10080/results/testcase/undefined"><code class="results bg-primary results_failed" id="results_lava_uboot-retry_F_fail"><span>case: uboot-retry</span><br><span>definition: lava</span><br><span>duration: 298.89</span><br><span>extra: ...</span><br><span>level: 2.4</span><br><span>namespace: common</span><br><span>result: fail</span><br></code></a><code class="error bg-danger" id="L793">uboot-action failed: 1 of 1 attempts. 'auto-login-action timed out after 255 seconds'</code><code class="exception bg-danger" id="L794">auto-login-action timed out after 255 seconds</code><code class="info bg-info" id="L795">end: 2 uboot-action (duration 00:05:00) [common]</code><a href="http://localhost:10080/results/testcase/undefined"><code class="results bg-primary results_failed" id="results_lava_uboot-action_F_fail"><span>case: uboot-action</span><br><span>definition: lava</span><br><span>duration: 299.89</span><br><span>extra: ...</span><br><span>level: 2</span><br><span>namespace: common</span><br><span>result: fail</span><br></code></a><code class="info bg-info" id="L797">Cleaning after the job</code><code class="debug" id="L798">Cleaning up download directory: /var/lib/lava/dispatcher/tmp/2/tftp-deploy-jkpu566_/kernel</code><code class="debug" id="L799">Cleaning up download directory: /var/lib/lava/dispatcher/tmp/2/tftp-deploy-jkpu566_/dtb</code><code class="debug" id="L800">Cleaning up download directory: /var/lib/lava/dispatcher/tmp/2/tftp-deploy-jkpu566_/nfsrootfs</code><code class="debug" id="action_3-1">start: 3.1 power-off (timeout 00:00:10) [common]</code><code class="debug" id="L802">Calling: 'nice' 'curl' 'http://admin:12345678@192.168.5.39/set.cmd?cmd=setpower+p61=0'</code><code class="debug" id="L803">&gt;&gt; &lt;html&gt;p61=0&lt;/html&gt;</code><code class="debug" id="L804">Returned 0 in 0 seconds</code><code class="debug" id="L805">end: 3.1 power-off (duration 00:00:01) [common]</code><a href="http://localhost:10080/results/testcase/25"><code class="results bg-primary" id="results_lava_power-off_F_pass"><span>case: power-off</span><br><span>definition: lava</span><br><span>duration: 0.83</span><br><span>extra: ...</span><br><span>level: 3.1</span><br><span>namespace: common</span><br><span>result: pass</span><br></code></a><code class="debug" id="action_3-2">start: 3.2 read-feedback (timeout 00:09:59) [common]</code><code class="debug" id="L808">Listened to connection for namespace 'common' for 1s</code><code class="info bg-info" id="L809">Finalising connection for namespace 'common'</code><code class="target bg-success" id="L810"> </code><code class="debug" id="L811">end: 3.2 read-feedback (duration 00:00:01) [common]</code><code class="info bg-info" id="L812">Override tmp directory removed at /var/lib/lava/dispatcher/tmp/2</code><code class="info bg-info" id="L813">Root tmp directory removed at /var/lib/lava/dispatcher/tmp/2</code><code class="error bg-danger" id="L814">JobError: Your job cannot terminate cleanly.</code><a href="http://localhost:10080/results/testcase/26"><code class="results bg-primary results_failed" id="results_lava_job_F_fail"><span>case: job</span><br><span>definition: lava</span><br><span>error_msg: auto-login-action timed out after 255 seconds</span><br><span>error_type: Job</span><br><span>result: fail</span><br></code></a><img id="log-messages" src="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/ajax-loader.gif" style="display: none;">
+      
+    </div>
+    
+    <p class="pull-right"><a href="#top">Top of page <span class="glyphicon glyphicon-chevron-up"></span></a></p>
+    
+    
+  </div>
+  <div class="tab-pane" id="Details">
+    <h2>Job Details <a class="btn btn-xs btn-info" href="http://localhost:10080/scheduler/job/2/description" title="Download YAML description">
+      <span class="glyphicon glyphicon-download"></span> YAML</a></h2>
+    <p><a href="http://localhost:10080/static/docs/v2/glossary.html#term-pipeline">Pipeline</a> jobs use
+     the job definition to generate a descriptive YAML file when the pipeline is validated.
+     The file represents the data sent to the dispatcher at the start of the job, including
+     details of the device as well as the job parameters and the details of the parameters
+     sent to each of the deploy, boot and test actions in the job pipeline.</p>
+     <p>Click on the Metadata, Device or Job Actions headings below to see some of the information
+     from the description file for this job or download the complete file as YAML using
+     the link above.</p>
+    <div class="panel-group" id="job_accordion">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title"><a data-toggle="collapse" data-parent="#job_accordion" href="#metadata_collapse">Metadata</a></h4>
+        </div>
+        <div id="metadata_collapse" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <dl class="dl-horizontal">
+              
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title"><a data-toggle="collapse" data-parent="#job_accordion" href="#device_collapse">Device</a></h4>
+        </div>
+        <div id="device_collapse" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <dl class="dl-horizontal">
+              <dt>device type</dt>
+              <dd></dd>
+              <dt>hostname</dt>
+              <dd></dd>
+              <dt>timeouts</dt>
+              <dd>
+                <ul>
+                  
+                </ul>
+              </dd>
+              <dt>device action methods</dt>
+              <dd>
+                
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title"><a data-toggle="collapse" data-parent="#job_accordion" href="#job_actions">Job Actions</a></h4>
+        </div>
+        <div id="job_actions" class="panel-collapse collapse">
+          <div class="panel-body">
+
+            <!-- Here we insert another nested accordion -->
+            <dl class="dl-horizontal">
+              <dt>target</dt>
+              <dd>...</dd>
+              <dt>timeouts</dt>
+              <dd>
+                ...
+                
+              </dd>
+            </dl>
+            <div class="panel-group" id="action_list">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title"><a data-toggle="collapse" data-parent="#action_list" href="#collapseInnerOne">Deploy</a></h4>
+                </div>
+                <div id="collapseInnerOne" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    <ol>
+                      
+                    </ol>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title"><a data-toggle="collapse" data-parent="#action_list" href="#collapseInnerTwo">Boot</a></h4>
+                </div>
+                <div id="collapseInnerTwo" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    <ol>
+                    
+                    </ol>
+                  </div>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title"><a data-toggle="collapse" data-parent="#action_list" href="#collapseInnerThree">Test</a></h4>
+                </div>
+                <div id="collapseInnerThree" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    <ol>
+                      
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Inner accordion ends here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="Timing">
+    <h2>Job Timings</h2>
+    <p>This section helps test writers to check for actions with a duration which
+       is much shorter than the requested timeout.  Reducing these timeouts
+       will allow failures to be identified more quickly.</p>
+    <p>The graph only shows actions that are longer than 1 second. The full list
+       is anyway available in the table.</p>
+
+    <div id="timing_block">Loading the data...</div>
+  </div>
+
+</div>
+
+<!-- Modal HTML -->
+<div id="similar_jobs_modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 class="modal-title">Find similar test jobs</h3>
+        <p>
+          Add query criteria to identify other test jobs similar to this
+ one, e.g. by submitter, actual_device, user, status or metadata 
+generated by this test job.
+        </p>
+        <p>
+          Hint: Please take a look at the metadata of the test job results to find out more about the available metadata fields.
+        </p>
+        <p>
+          Hint: Start typing to search for the available fields depending on the entity.<br>Available fields will appear in a list below.
+        </p>
+      </div>
+      <div class="modal-body">
+	<div id="similar_jobs_errors" class="errorlist" style="color: red;"></div>
+	<form id="similar_jobs_form" class="well" method="post" action="/scheduler/job/2/similarjobs">
+          <input id="id_condition_choices" type="hidden" value="{&quot;3&quot;: {&quot;fields&quot;: {&quot;submitter&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;iexact&quot;: &quot;Case-insensitive match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;}, &quot;type&quot;: &quot;ForeignKey&quot;}, &quot;start_time&quot;: {&quot;operators&quot;: {&quot;gt&quot;: &quot;Greater than&quot;, &quot;lt&quot;: &quot;Less than&quot;, &quot;exact&quot;: &quot;Exact match&quot;}, &quot;type&quot;: &quot;DateTimeField&quot;}, &quot;end_time&quot;: {&quot;operators&quot;: {&quot;gt&quot;: &quot;Greater than&quot;, &quot;lt&quot;: &quot;Less than&quot;, &quot;exact&quot;: &quot;Exact match&quot;}, &quot;type&quot;: &quot;DateTimeField&quot;}, &quot;state&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;}, &quot;type&quot;: &quot;IntegerField&quot;, &quot;choices&quot;: [&quot;Submitted&quot;, &quot;Scheduling&quot;, &quot;Scheduled&quot;, &quot;Running&quot;, &quot;Canceling&quot;, &quot;Finished&quot;]}, &quot;health&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;}, &quot;type&quot;: &quot;IntegerField&quot;, &quot;choices&quot;: [&quot;Unknown&quot;, &quot;Complete&quot;, &quot;Incomplete&quot;, &quot;Canceled&quot;]}, &quot;actual_device&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;iexact&quot;: &quot;Case-insensitive match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;}, &quot;type&quot;: &quot;ForeignKey&quot;}, &quot;requested_device_type&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;iexact&quot;: &quot;Case-insensitive match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;}, &quot;type&quot;: &quot;ForeignKey&quot;}, &quot;health_check&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;}, &quot;type&quot;: &quot;BooleanField&quot;}, &quot;priority&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;}, &quot;type&quot;: &quot;IntegerField&quot;, &quot;choices&quot;: [&quot;Low&quot;, &quot;Medium&quot;, &quot;High&quot;]}, &quot;description&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;iexact&quot;: &quot;Case-insensitive match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;}, &quot;type&quot;: &quot;CharField&quot;}}}, &quot;date_format&quot;: &quot;%Y-%m-%d %H:%M:%S&quot;, &quot;9&quot;: {&quot;fields&quot;: {&quot;name&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;iexact&quot;: &quot;Case-insensitive match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;}, &quot;type&quot;: &quot;CharField&quot;}}}, &quot;6&quot;: {&quot;fields&quot;: {&quot;name&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;iexact&quot;: &quot;Case-insensitive match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;}, &quot;type&quot;: &quot;TextField&quot;}, &quot;result&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;}, &quot;type&quot;: &quot;PositiveSmallIntegerField&quot;, &quot;choices&quot;: [&quot;Test passed&quot;, &quot;Test failed&quot;, &quot;Test skipped&quot;, &quot;Unknown outcome&quot;]}, &quot;measurement&quot;: {&quot;operators&quot;: {&quot;exact&quot;: &quot;Exact match&quot;, &quot;iexact&quot;: &quot;Case-insensitive match&quot;, &quot;ne&quot;: &quot;Not equal to&quot;, &quot;icontains&quot;: &quot;Contains&quot;, &quot;gt&quot;: &quot;Greater than&quot;, &quot;lt&quot;: &quot;Less than&quot;}, &quot;type&quot;: &quot;DecimalField&quot;}}}, &quot;18&quot;: {&quot;fields&quot;: {}}}">
+          <input id="id_available_content_types" type="hidden" value="{&quot;3&quot;: &quot;test job&quot;, &quot;18&quot;: &quot;metadata&quot;}">
+          <div class="row">
+            <div class="col-xs-4">
+              <strong>Match entity</strong>
+            </div>
+            <div class="col-xs-4">
+              <strong>Match field</strong>
+            </div>
+          </div>
+          <br>
+          <div id="options_container">
+	    <input type="hidden" name="csrfmiddlewaretoken" value="TorFmW6248ekbSsWLu5AkVg08GoRSOgpumX11XNsHQuU9cn3Tg65cGnZ49YTT1lx">
+          <div class="row" id="container_0"><div class="col-xs-4"><select id="table_0" name="table"><option value="3" selected="selected">test job</option><option value="18">metadata</option></select></div><div class="col-xs-4"><div class="typeahead__container"><div class="typeahead__field"><div class="typeahead__query"><input type="search" placeholder="Search" autocomplete="off" id="field_0" name="field"></div></div></div></div><div class="col-xs-4"><a class="glyphicon glyphicon-remove" href="#" id="remove_0"></a></div></div></div>
+          <hr>
+          <a onclick="add_option_row();" class="btn btn-sm btn-primary" href="javascript: void(0);">
+            Add new option
+          </a>
+	</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="submit_similar_jobs" type="button" class="btn btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="bottom"></div>
+
+</div>
+
+<div id="footer">
+  <div class="container">
+    <p class="text-muted text-center">LAVA 2020.02<br>
+        LAVA is free software developed by <a href="http://linaro.org/">Linaro</a> and the <a href="https://www.lavasoftware.org/">LAVA Software Community Project</a>.
+        It is distributed under the terms of the <a href="http://www.gnu.org/licenses/agpl-3.0.html">GNU Affero General Public License version 3</a>.<br>
+        <a href="https://git.lavasoftware.org/lava/lava/issues">Report a bug</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+        <a href="http://localhost:10080/static/docs/v2/support.html">Support</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+        <a href="https://git.lavasoftware.org/lava/lava">Source code</a>
+    </p>
+  </div>
+</div>
+
+
+
+
+<script type="text/javascript" src="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/jquery-3.js"></script>
+<script type="text/javascript" src="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/bootstrap-3.js"></script>
+
+<script type="text/javascript">
+  var condition_choices = JSON.parse($("#id_condition_choices").val());
+  var content_types = JSON.parse($("#id_available_content_types").val());
+</script>
+<script type="text/javascript" src="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/anchor-v3.js"></script>
+<script type="text/javascript" src="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/jquery_002.js"></script>
+<script type="text/javascript" src="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/similar-jobs.js"></script>
+<script type="text/javascript" src="LAVA%20|%20Scheduler%20|%20Jobs%20|%205_files/jquery.js"></script>
+<script type="text/javascript">
+  $(document).ready(
+    function() {
+
+      // Create a new CSS sheet and use it
+      var sheet = (function() {
+        var style = document.createElement("style");
+        // WebKit hack :(
+        style.appendChild(document.createTextNode(""));
+        document.head.appendChild(style);
+        return style.sheet;
+      })();
+
+      // Create the list of styles
+      // Debug are deactivated by default
+      var styles = {
+        'debug': sheet.insertRule('.debug { display: block }', 0),
+        'keyboard': sheet.insertRule('.keyboard { display: block }', 1),
+        'info': sheet.insertRule('.info { display: block }', 2),
+        'warning': sheet.insertRule('.warning { display: block }', 3),
+        'error': sheet.insertRule('.error { display: block }', 4),
+        'target': sheet.insertRule('.target { display: block }', 5),
+        'results': sheet.insertRule('.results { display: block }', 6),
+        'feedback': sheet.insertRule('.feedback { display: block }', 7),
+      };
+
+      // Handle click events on buttons
+      $("#logbuttons label").click(function(e) {
+        var label = e.target.htmlFor;
+        var input = $('input#' + label);
+        var rule;
+        if (input.is(':checked')) {
+          rule = '.' + label + ' { display: block }';
+          $('label#' + label + '_label').css('text-decoration', 'None');
+        } else {
+          rule = '.' + label + ' { display: none }';
+          $('label#' + label + '_label').css('text-decoration', 'line-through');
+        }
+        // Remove old style and insert the new one
+        var index = styles[label];
+        sheet.deleteRule(index);
+        sheet.insertRule(rule, index);
+      });
+
+      // Open the affix if the user click on the button
+      var affix_toggle = true;
+      $('.affix h4').click(function() {
+        if(affix_toggle) {
+          $('#affix-full').css('display', 'block');
+          $('.affix span').removeClass('glyphicon-arrow-down');
+          $('.affix span').addClass('glyphicon-arrow-up');
+        } else {
+          $('#affix-full').css('display', 'none');
+          $('.affix span').removeClass('glyphicon-arrow-up');
+          $('.affix span').addClass('glyphicon-arrow-down');
+        }
+        affix_toggle = !affix_toggle;
+      });
+
+      // Move the affix
+      var affix = $('.affix');
+      var affix_top = window.scrollY +
+                      $('.affix h4')[0].getBoundingClientRect().top - 70;
+      // Place it correctly if the page is reloaded while not at the top
+      if (document.body.scrollTop > affix_top ||
+          document.documentElement.scrollTop > affix_top) {
+        affix.addClass("fix-affix");
+      }
+      $(window).scroll(function(e) {
+        if (document.body.scrollTop > affix_top ||
+            document.documentElement.scrollTop > affix_top) {
+          affix.addClass("fix-affix");
+        } else {
+          affix.removeClass("fix-affix");
+        }
+      });
+
+
+      // Load the timing on demand
+      var timing_already_loaded = false;
+      $("#TimingButton").click(function(e) {
+        if (timing_already_loaded) { return; }
+        $.ajax({
+          url: '/scheduler/job/2/timing',
+          error: function(xhr, txt_status, error) {
+            $('#timing_block').html("<p><strong>Unable to load the timing!</strong</p>");
+          },
+          success: function(data, success, xhr) {
+            if (data['graph'].length == 0) {
+              $('#timing_block').html("<p>Unable to parse the log file.</p>");
+              return;
+            }
+            $('#timing_block').html(data['timing']);
+            // Generate the graph
+            var durations = [];
+            var timeouts = [];
+            var levels = [];
+            for(var i = 0; i < data['graph'].length; i++) {
+              if (data['graph'][i][2] <= 1) { continue; }
+              durations.push([i, data['graph'][i][2]]);
+              timeouts.push([i, data['graph'][i][3]]);
+              levels.push([i, data['graph'][i][0]]);
+            }
+
+            var ddata = [
+              {'label': 'duration', 'data': durations, 'color': '#FF0000'},
+              {'label': 'timeout', 'data': timeouts, 'color': '#0000FF'},
+            ];
+
+            $.plot($("#timings"), ddata, {
+              series: {
+                lines: { show: true, fill: true, steps: false },
+              },
+              xaxis: {
+                ticks: levels,
+              },
+            });
+          }
+        });
+        timing_already_loaded = true;
+      })
+    });
+
+    
+
+
+  // Add a timer for the log updates
+  pollTimer = setTimeout(poll, 5000);
+
+
+  var poll_status = 1;
+  var poll_logs = 1;
+  var position = 0;
+  var progressNode = $('#log-messages');
+  var action_id_regexp = /^start: ([\d.]+) [\w_-]+ /;
+  function poll() {
+    // Update job status
+    if(poll_status) {
+      $.ajax({
+        url: '/scheduler/job/2/job_status',
+        success: function(data, success, xhr) {
+          $('#actual_device').html(data['actual_device']);
+          $('#started').html(data['started']);
+          $('#jobstatus').html(data['job_state']);
+          $('#duration').html(data['duration']);
+          for(var i = 0; i < data['subjobs'].length; i++) {
+            var d = data['subjobs'][i];
+            $('#subjob_' + d[0]).html(d[1]);
+          }
+          if ('X-JobState' in data) {
+            $('#cancel').css('display', 'none');
+            $('#fail').css('display', 'none');
+            poll_status = 0;
+          }
+          if (data['failure_comment']) {
+            $("#failure_block").show();
+            $(".failure_comment").html(data['failure_comment']);
+          }
+        }
+      });
+    }
+
+    // Update logs
+    if(poll_logs) {
+      $.ajax({
+        url: '/scheduler/job/2/log_pipeline_incremental?line=' + position,
+        success: function(data, success, xhr) {
+          // Do we have to scroll down ?
+          var scroll_down = false;
+          if((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+            scroll_down = true;
+          }
+
+          // Loop on all new code blocks
+          for(var i = 0; i < data.length; i++) {
+              var d = data[i];
+              var level = d['lvl'];
+              var id = "L" + (position + i);
+
+              var node;
+              if(level == 'debug') {
+                var action_id = action_id_regexp.exec(d['msg']);
+                if(action_id) {
+                  id = 'action_' + action_id[1].replace(/\./g, '-');
+                }
+                $('<code class="debug" id="' + id + '"></code>')
+                  .text(d['msg'])
+                  .insertBefore(progressNode);
+              } else if(level == 'input') {
+                $('<code class="keyboard" id="' + id + '"></code>')
+                  .append($('<kbd></kbd>')
+                  .text(d['msg']))
+                  .insertBefore(progressNode);
+              } else if(level == 'target') {
+                $('<code class="target bg-success" id="' + id + '"></code>')
+                  .text(d['msg'])
+                  .insertBefore(progressNode);
+              } else if(level == 'feedback') {
+                $('<code class="feedback" id="' + id + '"></code>')
+                  .text(d['msg'])
+                  .insertBefore(progressNode);
+              } else if(level == 'results') {
+                id = 'results_' + d['msg']['definition'] + '_' + d['msg']['case'] + '_F_' + d['msg']['result'];
+                // TODO: not working with MOUNT_POINT
+                var link = $('<a href="/results/testcase/' + d['msg']['case_id'] + '"></a>');
+                var node;
+                if(d['msg']['result'] == 'fail') {
+                  node = $('<code class="results bg-primary results_failed" id="' + id + '"></code>');
+                } else {
+                  node = $('<code class="results bg-primary" id="' + id + '"></code>');
+                }
+                for(key in d['msg']) {
+                  if(typeof(d['msg'][key]) == 'string') {
+                    node.append($('<span></span>').text(key + ': ' + d['msg'][key]));
+                    node.append($('<br />'));
+                  } else if(key == 'extra') {
+                    node.append($('<span>extra: ...</span><br />'));
+                  } else {
+                    for(k in d ['msg'][key]) {
+                      node.append($('<span></span>').text(k + ': ' + d['msg'][key][k]));
+                      node.append($('<br />'));
+                    }
+                  }
+                }
+                link.append(node);
+                link.insertBefore(progressNode);
+              } else if (level == 'error' || level == 'exception' ) {
+                $('<code class="' + level + ' bg-danger" id="' + id + '"></code>')
+                  .text(d['msg'])
+                  .insertBefore(progressNode);
+              } else {
+                var action_id = action_id_regexp.exec(d['msg']);
+                if(action_id) {
+                  id = 'action_' + action_id[1].replace(/\./g, '-');
+                }
+                $('<code class="' + level + ' bg-' + level + '" id="' + id + '"></code>')
+                  .text(d['msg'])
+                  .insertBefore(progressNode);
+              }
+          }
+          // Relaunch the timer
+          if(xhr.getResponseHeader('X-Size-Warning')) {
+            $('#log-messages').css('display', 'none');
+            $('#sectionlogs').css('display', 'none');
+            $('#size-warning').css('display', 'block');
+            poll_logs = 0;
+          } else if(xhr.getResponseHeader('X-Is-Finished')) {
+            $('#log-messages').css('display', 'none');
+            poll_logs = 0;
+          } else {
+            position += data.length
+          }
+
+          // Scroll down
+          if (scroll_down) {
+            document.getElementById('bottom').scrollIntoView();
+          }
+        }
+      });
+    }
+    if(poll_status || poll_logs) {
+      pollTimer = setTimeout(poll, 5000);
+    }
+  };
+</script>
+
+
+
+</body></html>
