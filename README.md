@@ -1,4 +1,7 @@
 # Metatrader_utility
+https://gitlab.com/lcvinh/g2_lava.git
+https://gitlab.com/canhdaorvc2/lava_it.git
+
 setenv autoload no
 setenv initrd_high 0xffffffff
 setenv fdt_high 0xffffffff
