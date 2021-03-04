@@ -1,0 +1,9 @@
+sudo a2dissite 000-default
+sudo systemctl reload apache2
+sudo a2enmod proxy
+sudo a2enmod proxy_http
+sudo a2ensite lava-server.conf
+sudo service apache2 restart
+sudo apache2ctl restart
+sudo service lava-master restart
+sudo service lava-server-gunicorn restart

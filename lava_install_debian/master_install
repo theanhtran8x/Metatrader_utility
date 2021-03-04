@@ -1,0 +1,14 @@
+sudo apt-get -y update
+sudo apt-get install -y ca-certificates gnupg2 wget
+sudo wget https://apt.lavasoftware.org/lavasoftware.key.asc
+sudo apt-key add lavasoftware.key.asc
+sudo echo "deb https://apt.lavasoftware.org/release buster main" > /etc/apt/sources.list.d/lava.list
+sudo apt-get -y install apache2 postgresql
+sudo service postgresql start
+sudo pg_lsclusters
+sudo pg_ctlcluster 11 main start
+sudo service postgresql restart
+sudo apt-get -y install lava-server
+
+sudo rm -rf lavasoftware.key.asc
+

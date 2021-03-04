@@ -1,0 +1,3 @@
+sudo service lava-slave restart
+sudo service lava-coordinator restart
+sudo service lava-server-gunicorn restart

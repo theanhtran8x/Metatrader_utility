@@ -1,0 +1,6 @@
+https://s3-us-west-2.amazonaws.com/download.cip-project.org/ciptesting/cip-lava/kernel/linux-4.19.y-cip-latest/arm64/renesas_defconfig/Image
+https://s3-us-west-2.amazonaws.com/download.cip-project.org/ciptesting/cip-lava/rfs/initramfs_64.cpio.gz
+https://s3-us-west-2.amazonaws.com/download.cip-project.org/ciptesting/cip-lava/kernel/linux-4.19.y-cip-latest/arm64/renesas_defconfig/r8a774a1-hihope-rzg2m-ex.dtb
+https://s3-us-west-2.amazonaws.com/download.cip-project.org/ciptesting/cip-lava/kernel/linux-4.19.y-cip-latest/arm64/renesas_defconfig/Image
+https://s3-us-west-2.amazonaws.com/download.cip-project.org/ciptesting/cip-lava/rfs/initramfs_64.cpio.gz
+https://s3-us-west-2.amazonaws.com/download.cip-project.org/ciptesting/cip-lava/kernel/linux-4.19.y-cip-latest/arm64/renesas_defconfig/r8a774b1-hihope-rzg2n-ex.dtb

@@ -1,0 +1,16 @@
+sudo apt-get -y update
+sudo wget https://apt.lavasoftware.org/lavasoftware.key.asc
+sudo apt-key add lavasoftware.key.asc
+sudo echo "deb https://apt.lavasoftware.org/release buster main" > /etc/apt/sources.list.d/lava.list
+
+sudo apt-get -y install cu conmux telnet git
+sudo apt-get -y install ser2net
+sudo apt-get -y install lavacli lavapdu-client wget
+sudo apt-get -y install grub-efi-amd64-bin:amd64
+sudo apt-get -y install patch
+sudo apt-get -y install lava-coordinator lava-dispatcher
+sudo apt-get -y install screen openssh-server
+sudo apt-get -y update
+
+sudo rm -rf lavasoftware.key.asc
+

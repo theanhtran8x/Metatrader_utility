@@ -1,0 +1,5 @@
+#lavacli identities add --uri http://debian10:80/RPC2 --token "test" --username admin default
+
+#lavacli --uri http://admin@debian10:80/RPC2 device-types list
+#lavacli --uri http://admin@debian10:80/RPC2 devices list
+lavacli --uri http://admin@debian10:80/RPC2 workers list

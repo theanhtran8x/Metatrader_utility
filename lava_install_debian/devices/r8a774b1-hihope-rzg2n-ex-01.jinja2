@@ -1,0 +1,7 @@
+{% extends 'r8a774b1-hihope-rzg2n-ex.jinja2' %}
+
+{% set hard_reset_command = 'curl http://admin:12345678@192.168.5.39/set.cmd?cmd=setpower+p61=0 curl http://admin:12345678@192.168.5.39/set.cmd?cmd=setpower+p61=1' %}
+{% set power_off_command = 'curl http://admin:12345678@192.168.5.39/set.cmd?cmd=setpower+p61=0' %}
+{% set power_on_command = 'curl http://admin:12345678@192.168.5.39/set.cmd?cmd=setpower+p61=1' %}
+
+{% set connection_command = 'telnet 127.0.0.1 63001' %}

@@ -1,0 +1,24 @@
+#hostname (/etc/hosts and /etc/hostname)  or IP address of lava-server machine.
+master_name: debian10
+
+#hostname (/etc/hosts and /etc/hostname) or IP address of lava-dispatcher machine.
+slave_name: debian10.linuxvmimages.local 
+
+#User name
+user_name: admin
+
+#Password
+pass_of_admin: Pass1234
+
+#dispacher
+DISPACHER_IP: 10.0.3.15 
+#Token:
+token: 515n3kj29fnmccqcwfqe2dx37261tryx9fdsk8clw1e7csyqql4dy7zuqdi2993sodjs8q371euhtf2cktdf226x03cg0x6o606yitdb2xprmipr6sz1ic551fyq0brx 
+
+#Device type name will add into system. All device_type store in ./device-types
+#User can create and add new device-type by command and lava web interface
+
+#Device name will add into system. All devices store in All device_type store in ./devices
+#User can create and add new device by command and lava web interface
+
+ 
